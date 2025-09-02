@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Property Management{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar container">
+      <a class="brand" href="{% url 'home' %}">PM</a>
+      <ul class="nav-links">
+        {% if user.is_authenticated %}
+          <li class="nav-item user">Hello, {{ user.username }}</li>
+          <li class="nav-item"><a class="btn btn-outline" href="{% url 'logout' %}">Logout</a></li>
+        {% else %}
+          <li class="nav-item"><a href="{% url 'login' %}">Login</a></li>
+          <li class="nav-item"><a class="btn" href="{% url 'signup' %}">Sign up</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="message {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small>&copy; {% now "Y" %} Property Management</small>
+    </div>
+  </footer>
+
+  {% block extra_body %}{% endblock %}
+</body>
+</html>

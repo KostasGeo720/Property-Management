@@ -1,0 +1,31 @@
+{% extends "pm/base.html" %}
+{% load static %}
+{% block title %}Login | Property Management{% endblock %}
+
+{% block content %}
+  <section class="auth-card">
+    <h1>Log in</h1>
+    <form method="post" class="form auth-form">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="form-row">
+        <label for="id_username">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+
+      <div class="form-row">
+        <label for="id_password">Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn">Log in</button>
+      </div>
+    </form>
+
+    <p class="alt-action">Don’t have an account? <a href="{% url 'signup' %}">Sign up</a>.</p>
+  </section>
+{% endblock %}
