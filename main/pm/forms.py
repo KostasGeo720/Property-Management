@@ -36,6 +36,5 @@ class NewProblemForm(forms.ModelForm):
         model = Problem
         fields = [
             'property',
-            'tenant',
             'description'
             ]

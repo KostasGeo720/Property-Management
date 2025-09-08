@@ -30,7 +30,7 @@ class Property(models.Model):
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     tennant = models.ForeignKey(User, default=None, on_delete=models.CASCADE, related_name='rental_tennant')  # Add a tennant field with a related name
-    status = models.CharField(max_length=50, default='Available', choices=[('available', 'Available'), ('sold', 'Sold'), ('rented', 'Rented')])  # Add a status field with choices
+    status = models.CharField(max_length=50, default='Available', choices=[('available', 'Available'), ('rented', 'Rented')])  # Add a status field with choices
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -42,6 +42,9 @@ class Property(models.Model):
             return True
         else:
             return False
+        
+    def __str__(self):
+        return f'{self.address}'
         
 class Lease(models.Model):
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
@@ -69,3 +72,6 @@ class Problem(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f'{self.tenant}|{self.property}'

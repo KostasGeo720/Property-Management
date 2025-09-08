@@ -15,6 +15,7 @@
       <ul class="nav-links">
         {% if user.is_authenticated %}
           <li class="nav-item user">Hello, {{ user.username }}</li>
+          {% block staff_nav %}{% endblock staff_nav %}
           <li class="nav-item"><a class="btn btn-outline" href="{% url 'logout' %}">Logout</a></li>
         {% else %}
           <li class="nav-item"><a href="{% url 'login' %}">Login</a></li>

@@ -79,3 +79,82 @@ body {
 /* Django error list */
 .errorlist { margin: 0; padding: 0; list-style: none; color: #fecaca; font-size: 14px; }
 .errorlist li { margin-top: 4px; }
+
+.problem-card {
+  border: 3px dashed var(--primary);
+  background-color: var(--panel-2);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radius);
+}
+.problem-card:hover {
+  border-color: var(--primary-600);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.problem-header {
+  margin-bottom: 0.5rem;
+}
+
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.problem-description {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.property-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  margin-top: 24px;
+}
+
+.property-card {
+  background: var(--panel-2);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.property-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.property-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status.available { background: var(--success); color: #fff; }
+.status.rented { background: var(--warning); color: #000; }
+.status.sold { background: var(--danger); color: #fff; }
+
+.property-details p {
+  margin: 6px 0;
+  color: var(--muted);
+}
+
+.description {
+  margin-top: 12px;
+  font-style: italic;
+  color: var(--text);
+}

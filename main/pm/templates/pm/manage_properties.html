@@ -1,0 +1,37 @@
+{% extends 'pm/home.html' %}
+
+{% block title %}Manage Properties{% endblock %}
+
+{% block content %}
+  <h2>My Properties</h2>
+
+  {% if properties %}
+    <div class="property-grid">
+      {% for property in properties %}
+        <div class="property-card">
+          <div class="property-header">
+            <h3>{{ property.address }}</h3>
+            {% if property.status == 'available' %}
+            <span class="status {{ property.status|lower }}"><h2 style="color:#97f75c">{{ property.status.upper }}</h2></span>
+            {% else %}
+            <span class="status {{ property.status|lower }}"><h2 style="color:#f73434">{{ property.status.upper }}</h2></span>
+            {% endif %}
+          </div>
+          <div class="property-details">
+            <p><strong>Type:</strong> {{ property.get_property_type_display }}</p>
+            <p><strong>Size:</strong> {{ property.property_size }}</p>
+            <p><strong>Price:</strong> €{{ property.price }} ({{ property.price_status }}) <a href="{% url "status_price" property.id %}" class="btn btn-outline">Change Status</a></p>
+            <p><strong>Rent:</strong> €{{ property.rent_price }} ({{ property.rent_price_status }}) <a href="{% url "status_rent" property.id %}" class="btn btn-outline">Change Status</a></p>
+            <p><strong>Bedrooms:</strong> {{ property.bedrooms }} | <strong>Bathrooms:</strong> {{ property.bathrooms }}</p>
+            <p><strong>Parking:</strong> {{ property.parking_spaces }}</p>
+            <p><strong>Amenities:</strong> {{ property.amenities }}</p>
+            <p><strong>Tenant:</strong> {{ property.tennant.username }}</p>
+            <p class="description">{{ property.description|truncatewords:25 }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>You haven't added any properties yet.</p>
+  {% endif %}
+{% endblock %}
