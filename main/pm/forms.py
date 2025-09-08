@@ -32,6 +32,14 @@ class NewLeaseForm(forms.ModelForm):
             ]
 
 class NewProblemForm(forms.ModelForm):
+    start_date = forms.DateField(widget=forms.DateInput(attrs={
+        'type': 'date',
+        'class': 'form-control'
+    }))
+    end_date = forms.DateField(widget=forms.DateInput(attrs={
+        'type': 'date',
+        'class': 'form-control'
+    }))
     class Meta:
         model = Problem
         fields = [
