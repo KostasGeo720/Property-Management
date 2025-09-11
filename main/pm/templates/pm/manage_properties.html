@@ -20,18 +20,30 @@
           <div class="property-details">
             <p><strong>Type:</strong> {{ property.get_property_type_display }}</p>
             <p><strong>Size:</strong> {{ property.property_size }}</p>
-            <p><strong>Price:</strong> €{{ property.price }} ({{ property.price_status }}) <a href="{% url "status_price" property.id %}" class="btn btn-outline">Change Status</a></p>
-            <p><strong>Rent:</strong> €{{ property.rent_price }} ({{ property.rent_price_status }}) <a href="{% url "status_rent" property.id %}" class="btn btn-outline">Change Status</a></p>
             <p><strong>Bedrooms:</strong> {{ property.bedrooms }} | <strong>Bathrooms:</strong> {{ property.bathrooms }}</p>
             <p><strong>Parking:</strong> {{ property.parking_spaces }}</p>
             <p><strong>Amenities:</strong> {{ property.amenities }}</p>
-            <p><strong>Tenant:</strong> {{ property.tennant.username }}</p>
-            <p class="description">{{ property.description|truncatewords:25 }}</p>
+            <p><strong>Description:</strong> {{ property.description }}</p>
+            <div style="text-align: center; margin-top: 10px;">
+              {% if property.id in leased_properties %}
+                  <a href="{% url "edit_lease" property.id %}" class="btn btn-outline">View Lease</a>
+              {% else %}
+                <a href="{% url "create_lease" property.id %}" class="btn btn-primary">Create Lease</a>
+              {% endif %}
+            </div>
+          </div>
+          <div style="text-align: center; margin-top: 10px;">
+            <a href="{% url "edit_property" property.id %}" class="btn btn-primary">Edit Property</a>
+            <a href="{% url "delete_property" property.id %}" class="btn btn-outline">Delete Property</a>
           </div>
         </div>
       {% endfor %}
     </div>
+
   {% else %}
     <p>You haven't added any properties yet.</p>
   {% endif %}
+  <div style="text-align: center; margin-top: 20px;">
+    <a href="{% url "create_property" %}" class="btn btn-primary">Add Property</a>
+  </div>
 {% endblock %}

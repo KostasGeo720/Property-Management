@@ -1,8 +1,10 @@
 {% extends 'pm/base.html' %}
 
+{% block title %}Add Tenant{% endblock %}
+
 {% block content %}
 <div class="auth-card">
-    <h1>{% block head %}Create New Lease{% endblock %}</h1>
+    <h1>Add New Tenant</h1>
 
     {% if messages %}
     <ul class="messages">
@@ -28,12 +30,9 @@
             {% endif %}
         </div>
         {% endfor %}
-        {% block edit_view %}{% endblock %}
         <div class="form-actions">
-            <button type="submit" class="btn">{% block btn %}Create Lease{% endblock %}</button>
-            {% block edit %}{% endblock edit %}
+            <button type="submit" class="btn">Add Tenant</button>
         </div>
     </form>
-    {% block js %}{% endblock js %}
 </div>
 {% endblock %}

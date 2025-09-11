@@ -1,15 +1,20 @@
 from django.shortcuts import render, redirect
+from django.template.defaulttags import register
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Property, Lease, Problem
-from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm
+from .models import Property, Lease, Problem, Message
+from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm
 
 # Create your views here.
 @login_required
 def home(request):
     problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
-    return render(request, 'pm/home.html', {'problems':problems})
+    leases = Lease.objects.filter(property__owner=request.user)
+    for lease in leases:
+        lease.update_payment_status()
+    notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
+    return render(request, 'pm/home.html', {'problems':problems, 'notifications':notifications})
 
 @login_required
 def create_property(request):
@@ -26,13 +31,24 @@ def create_property(request):
     return render(request, 'pm/create_property.html', {'form': form})
 
 @login_required
-def create_lease(request):
+def create_lease(request, property_id):
+    property = Property.objects.get(id=property_id)
+    raw_ids = request.GET.get('tenants', '')
+    tenant_ids = [tid for tid in raw_ids.split(',') if tid.isdigit()]
+    tenant_list = User.objects.filter(id__in=tenant_ids) if tenant_ids else []
     if request.method == 'POST':
         form = NewLeaseForm(request.POST)
         if form.is_valid():
-            form.save()
+            lease = form.save(commit=False)
+            lease.property = property
+            lease.save()
+            form.save_m2m()
+            property.status = 'rented'
+            property.save()
             messages.success(request, 'Lease created successfully!')
-            return redirect('home')
+            return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
     else:
         form = NewLeaseForm()
     return render(request, 'pm/create_lease.html', {'form': form})
@@ -62,31 +78,97 @@ def solve_problem(request, problem_id):
 
 @login_required
 def manage_properties(request):
+    leases = Lease.objects.filter(property__owner=request.user).order_by('-created_at')
+    leased_properties = [lease.property.id for lease in leases]
     properties = Property.objects.filter(owner=request.user).order_by('-created_at')
-    return render(request, 'pm/manage_properties.html', {'properties':properties})
+    lease_found = False
+    return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties})
 
 @login_required
-def status_price(request, property_id):
+def remove_tennant(request, lease_id, tennant_id):
+    lease = Lease.objects.get(id=lease_id)
+    tennant = User.objects.get(id=tennant_id)
+    lease.tennant.remove(tennant)
+    messages.success(request, 'Tennant removed successfully!')
+    if lease.tennant.count() == 0:
+        lease.property.status = 'available'
+        lease.delete()
+    lease.save()
+    return redirect('leases')
+
+@login_required
+def add_tennant(request, property_id):
     property = Property.objects.get(id=property_id)
-    if property.price_status in ('negotiable', 'Negotiable'):
-        property.price_status = 'fixed'
-        property.save()
-        messages.success(request, 'Price status changed to fixed successfully!')
+    lease = Lease.objects.get_or_create(property=property)[0]
+    if request.method == 'POST':
+        form = AddTenantForm(request.POST, instance=lease)
+        if form.is_valid():
+            selected_tenants = form.cleaned_data['tennant']
+            tenant_ids = [tenant.id for tenant in selected_tenants]
+            messages.success(request, 'Tennant added successfully!')
+            return redirect(f'/create_lease/{property_id}/?tenants={",".join(map(str, tenant_ids))}')
+        else:
+            messages.error(request, 'Error!')
     else:
-        property.price_status = 'negotiable'
-        property.save()
-        messages.success(request, 'Price status changed to negotiable successfully!')
+        form = AddTenantForm(instance=lease)
+    return render(request, 'pm/add_tennant.html', {'form':form})
+
+@login_required
+def edit_property(request, property_id):
+    property = Property.objects.get(id=property_id)
+    if request.method == 'POST':
+        form = NewPropertyForm(request.POST, instance=property)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Property updated successfully!')
+            return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
+    else:
+        form = NewPropertyForm(instance=property)
+    return render(request, 'pm/edit_property.html', {'form': form})
+
+@login_required
+def edit_lease(request, property_id):
+    lease = Lease.objects.get(property__id=property_id)
+    if request.method == 'POST':
+        form = NewLeaseForm(request.POST, instance=lease)
+        if form.is_valid():
+            l = form.save(commit=False)
+            if l.tenant.count() == 0:
+                messages.error(request, 'Lease must have at least one tenant!')
+            else:
+                form.save()
+                messages.success(request, 'Lease updated successfully!')
+                return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
+    else:
+        form = NewLeaseForm(instance=lease)
+    return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
+
+@login_required
+def delete_property(request, property_id):
+    property = Property.objects.get(id=property_id)
+    property.delete()
+    messages.success(request, 'Property deleted successfully!')
     return redirect('manage_properties')
 
 @login_required
-def status_rent(request, property_id):
-    property = Property.objects.get(id=property_id)
-    if property.rent_price_status in ('negotiable', 'Negotiable'):
-        property.rent_price_status = 'fixed'
-        property.save()
-        messages.success(request, 'Rent price status changed to fixed successfully!')
+def delete_lease(request, lease_id):
+    lease = Lease.objects.get(id=lease_id)
+    lease.property.status = 'available'
+    lease.property.save()
+    lease.delete()
+    messages.success(request, 'Lease deleted successfully!')
+    return redirect('manage_properties')
+
+@login_required
+def payment_status(request, lease_id):
+    lease = Lease.objects.get(id=lease_id)
+    if lease.monthly_payment_status == 'pending':
+        lease.pay()
+        messages.success(request, 'Payment marked as paid successfully!')
     else:
-        property.rent_price_status = 'negotiable'
-        property.save()
-        messages.success(request, 'Rent price status changed to negotiable successfully!')
+        messages.info(request, 'Payment is already marked as paid.')
     return redirect('manage_properties')

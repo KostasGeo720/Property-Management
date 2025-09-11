@@ -172,3 +172,72 @@ body {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(34,211,238,.18);
 }
+
+.notification-card {
+  border: 2px solid var(--primary);
+  background: var(--panel-2);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(34,211,238,0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.notification-card:hover {
+  border-color: var(--primary-600);
+  box-shadow: 0 6px 16px rgba(34,211,238,0.18);
+}
+.notification-header {
+  margin-bottom: 0.5rem;
+}
+.notification-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 0;
+}
+.notification-body {
+  margin-top: 0.25rem;
+}
+.notification-message {
+  color: var(--text);
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Make problem cards more distinct */
+.problem-card {
+  border: 2px dashed var(--warning);
+  background: var(--panel);
+  box-shadow: 0 2px 8px rgba(245,158,11,0.08);
+  margin-bottom: 1.5rem;
+  padding: 1.1rem;
+  border-radius: var(--radius);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.problem-card:hover {
+  border-color: var(--danger);
+  box-shadow: 0 8px 24px rgba(239,68,68,0.12);
+}
+.problem-header {
+  margin-bottom: 0.5rem;
+}
+.problem-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--danger);
+  margin: 0;
+}
+.problem-body {
+  margin-top: 0.25rem;
+}
+.problem-description {
+  color: var(--muted);
+  font-size: 1rem;
+  margin: 0.5rem 0 0 0;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--danger);
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}

@@ -6,7 +6,6 @@
   {% if user.is_staff %}
     <li class="nav-item"><a class="btn" href="{% url 'home' %}">Dashboard</a></li>
     <li class="nav-item"><a class="btn" href="{% url 'manage_properties' %}">Manage Properties</a></li>
-    <li class="nav-item"><a class="btn" href="{% url 'home' %}">Users</a></li>
   {% else %}
     <li class="nav-item"><a class="btn" href="{% url 'report_problem' %}">Report Problem</a></li>
   {% endif %}
@@ -14,8 +13,24 @@
 
 {% block content %}
   <h2>Welcome to Property Management</h2>
-  <h2>Reported Problems</h2>
+
+  <h1>Notifications</h1>
     <hr style="border-color: var(--primary); margin-bottom: 1rem;">
+    {% for notification in notifications %}
+      <div class="notification-card">
+        <div class="notification-header">
+          <h3 class="notification-title">{{notification.property}} ({{notification.timestamp}})</h3>
+        </div>
+        <div class="notification-body">
+          <p class="notification-message">{{ notification.content }}</p>
+        </div>
+      </div>
+      {% empty %}
+      <p>No Notifications!</p>
+    {% endfor %}
+    
+  <hr style="border-color: var(--primary); margin-bottom: 1rem;">
+  <h1>Reported Problems</h1>
   {% for problem in problems %}
     <div class="problem-card">
         <div class="problem-header">
@@ -32,5 +47,6 @@
     {% empty %}
     <p>No Problems!</p>
   {% endfor %}
+
   <hr style="border-color: var(--primary); margin-bottom: 1rem;">
 {% endblock %}

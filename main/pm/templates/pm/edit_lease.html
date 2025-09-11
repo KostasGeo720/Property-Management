@@ -1,0 +1,29 @@
+{% extends "pm/create_lease.html" %}
+
+{% block title %}Edit Lease{% endblock %}
+
+{% block head %}Edit Lease{% endblock head %}
+
+{% block edit_view %}
+<div class="form-row">
+    <label for="{{ lease.amount_paid }}">Total Amound Paid</label>
+    <input type="text" id="property" value="{{ lease.amount_paid }}" disabled>
+{% endblock edit_view %}
+
+{% block btn %}Edit Lease{% endblock btn %}
+{% block edit %}
+<a href="{% url "delete_lease" lease.id %}" class="btn btn-outline">Delete</a>
+{% if lease.monthly_payment_status == 'pending' %}
+<button onclick="return confirmSubmission()" class="btn btn-outline"><a href="{% url "payment_status" lease.id %}" class="btn btn-outline">Mark as Paid</a></button>
+{% endif %}
+
+{% endblock edit %}
+
+{% block js %}
+<script>
+function confirmSubmission() {
+  return confirm("Are you sure you want to mark the lease as paid for the month?");
+}
+</script>
+
+{% endblock js %}
