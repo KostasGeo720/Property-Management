@@ -1,1 +1,1 @@
-web: gunicorn Property_Management.wsgi
+web: gunicorn main.wsgi
