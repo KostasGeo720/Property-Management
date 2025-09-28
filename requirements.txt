@@ -16,9 +16,6 @@ Pygments==2.19.2
 pyinstaller==6.15.0
 pyinstaller-hooks-contrib==2025.8
 pypiwin32==223
-PyQt6==6.9.1
-PyQt6-Qt6==6.9.1
-PyQt6_sip==13.10.2
 pywin32==311
 pywin32-ctypes==0.2.3
 requests==2.32.5
