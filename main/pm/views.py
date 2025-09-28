@@ -7,13 +7,16 @@ from .models import Property, Lease, Problem, Message
 from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm
 
 # Create your views here.
-@login_required
-def home(request):
-    problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
+
+def update_status(request):
     leases = Lease.objects.filter(property__owner=request.user)
     for lease in leases:
         lease.update_payment_status()
+@login_required
+def home(request):
+    problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
+    update_status(request)
     return render(request, 'pm/home.html', {'problems':problems, 'notifications':notifications})
 
 @login_required
@@ -78,6 +81,7 @@ def solve_problem(request, problem_id):
 
 @login_required
 def manage_properties(request):
+    update_status(request)
     leases = Lease.objects.filter(property__owner=request.user).order_by('-created_at')
     leased_properties = [lease.property.id for lease in leases]
     properties = Property.objects.filter(owner=request.user).order_by('-created_at')
@@ -130,6 +134,7 @@ def edit_property(request, property_id):
 
 @login_required
 def edit_lease(request, property_id):
+    update_status(request)
     lease = Lease.objects.get(property__id=property_id)
     if request.method == 'POST':
         form = NewLeaseForm(request.POST, instance=lease)
@@ -166,9 +171,16 @@ def delete_lease(request, lease_id):
 @login_required
 def payment_status(request, lease_id):
     lease = Lease.objects.get(id=lease_id)
-    if lease.monthly_payment_status == 'pending':
+    if lease.monthly_payment_status.lower() == 'pending':
         lease.pay()
         messages.success(request, 'Payment marked as paid successfully!')
     else:
         messages.info(request, 'Payment is already marked as paid.')
     return redirect('manage_properties')
+
+@login_required
+def finances(request):
+    update_status(request)
+    leases = Lease.objects.filter(property__owner=request.user)
+    notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
+    return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})

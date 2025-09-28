@@ -52,67 +52,76 @@ class Lease(models.Model):
     monthly_payment_status = models.CharField(max_length=10, default='Pending', choices=[('pending', 'Pending'), ('paid', 'Paid')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    months_due = 0
-    remaining_months = 0
-
-    def calculate_remaining_months(self):
+    def get_remaining_months(self):
         today = timezone.now().date()
+        if today > self.end_date:
+            return 0
         delta = (self.end_date.year - today.year) * 12 + self.end_date.month - today.month
-        self.remaining_months = delta
-        self.save()
-        return self.remaining_months
-    
-    def calculate_months_due(self):
-        self.calculate_remaining_months()
+        # If the end day is before today, subtract one month
+        if self.end_date.day < today.day:
+            delta -= 1
+        return max(delta, 0)
+
+    def months_due(self):
         today = timezone.now().date()
-        owed_amount = ((today.year - self.start_date.year) * 12 + today.month - self.start_date.month)*self.monthly_payment_amount
-        self.months_due = (owed_amount-self.amount_paid)//self.monthly_payment_amount
-        if self.months_due < 0:
-            self.months_due = 0
-        self.save()
-        if self.months_due > 0:
-            msg = Message(
+        if today < self.start_date:
+            return 0
+        months_elapsed = (today.year - self.start_date.year) * 12 + today.month - self.start_date.month
+        if today.day < self.start_date.day:
+            months_elapsed -= 1
+        total_due = months_elapsed * self.monthly_payment_amount
+        months_due = int((total_due - self.amount_paid) // self.monthly_payment_amount)
+        return max(months_due, 0)
+
+    def notify_months_due(self):
+        due = self.months_due()
+        if due > 0:
+            msg_content = f'Lease for {self.property.address} has {due} months due (€{due*self.monthly_payment_amount} remaining).'
+            identical = Message.objects.filter(
                 owner=self.property.owner,
                 lease=self,
                 property=self.property,
-                content=f'Lease for {self.property.address} has {self.months_due} months due (€{self.months_due*self.monthly_payment_amount} remaining).'
-            )
-            identical = Message.objects.filter(
-                owner=msg.owner,
-                lease=self,
-                property=msg.property,
-                content=msg.content
+                content=msg_content
             )
             if not identical.exists():
-                msg.save()
+                Message.objects.create(
+                    owner=self.property.owner,
+                    lease=self,
+                    property=self.property,
+                    content=msg_content
+                )
                 for tenant in self.tenant.all():
                     Message.objects.create(
                         owner=tenant,
                         lease=self,
                         property=self.property,
-                        content=f'Your lease for {self.property.address} has {self.months_due} months due (€{self.months_due*self.monthly_payment_amount} remaining). Please make the payment as soon as possible.'
+                        content=msg_content
                     )
-        return self.months_due
-    
     def update_payment_status(self):
-        self.calculate_months_due()
-        
-        if timezone.now().day > int(self.start_date.day) and self.monthly_payment_status=='paid':
+        # Update payment status based on months_due
+        if self.months_due() > 0 and self.monthly_payment_status.lower() == 'paid':
             self.monthly_payment_status = 'pending'
             self.save()
-                
-    
-    def pay(self):
-        if self.monthly_payment_status == 'pending':
-            self.amount_paid += self.monthly_payment_amount
+        elif self.months_due() == 0 and self.monthly_payment_status.lower() == 'pending':
             self.monthly_payment_status = 'paid'
-            if self.months_due > 0:
-                self.months_due -= 1
+            self.save()
+        self.notify_months_due()
+
+    def pay(self, months=1):
+        # Only allow payment if there are months due
+        due = self.months_due()
+        if due > 0 and months > 0:
+            pay_months = min(months, due)
+            self.amount_paid += self.monthly_payment_amount * pay_months
+            self.save()
+            self.update_payment_status()
+            md = self.months_due()
             Message.objects.create(
                 owner=self.property.owner,
                 property=self.property,
-                content=f'Payment of ${self.monthly_payment_amount} received. {self.months_due} months still due.')
-            self.save()
+                lease=self,
+                content=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.'
+            )
             return True
         else:
             return False

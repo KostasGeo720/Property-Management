@@ -13,7 +13,7 @@
 {% block btn %}Edit Lease{% endblock btn %}
 {% block edit %}
 <a href="{% url "delete_lease" lease.id %}" class="btn btn-outline">Delete</a>
-{% if lease.monthly_payment_status == 'pending' %}
+{% if lease.monthly_payment_status.lower == 'pending' %}
 <button onclick="return confirmSubmission()" class="btn btn-outline"><a href="{% url "payment_status" lease.id %}" class="btn btn-outline">Mark as Paid</a></button>
 {% endif %}
 
