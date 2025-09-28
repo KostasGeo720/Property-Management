@@ -62,36 +62,44 @@ class Lease(models.Model):
         self.save()
         return self.remaining_months
     
-    def update_payment_status(self):
-        
+    def calculate_months_due(self):
         self.calculate_remaining_months()
-        
-        if self.remaining_months*self.monthly_payment_amount <= self.amount_paid:
-            self.monthly_payment_status = 'paid'
+        today = timezone.now().date()
+        owed_amount = ((today.year - self.start_date.year) * 12 + today.month - self.start_date.month)*self.monthly_payment_amount
+        self.months_due = (owed_amount-self.amount_paid)//self.monthly_payment_amount
+        if self.months_due < 0:
             self.months_due = 0
-            self.save()
-            return True
+        self.save()
+        if self.months_due > 0:
+            msg = Message(
+                owner=self.property.owner,
+                lease=self,
+                property=self.property,
+                content=f'Lease for {self.property.address} has {self.months_due} months due (€{self.months_due*self.monthly_payment_amount} remaining).'
+            )
+            identical = Message.objects.filter(
+                owner=msg.owner,
+                lease=self,
+                property=msg.property,
+                content=msg.content
+            )
+            if not identical.exists():
+                msg.save()
+                for tenant in self.tenant.all():
+                    Message.objects.create(
+                        owner=tenant,
+                        lease=self,
+                        property=self.property,
+                        content=f'Your lease for {self.property.address} has {self.months_due} months due (€{self.months_due*self.monthly_payment_amount} remaining). Please make the payment as soon as possible.'
+                    )
+        return self.months_due
+    
+    def update_payment_status(self):
+        self.calculate_months_due()
         
-        if timezone.now().day > int(self.start_date.day):
-            if self.monthly_payment_status=='paid':
-                self.monthly_payment_status = 'pending'
-                self.save()
-            else:
-                self.months_due += 1
-                Message.objects.create(
-                    owner=self.property.owner,
-                    property=self.property,
-                    content=f'Monthly payment of ${self.monthly_payment_amount} is overdue ({self.months_due} months due). Please take action.'
-                )
-                self.save()
-        elif timezone.now().day == int(self.start_date.day):
-            if self.monthly_payment_status == 'pending' and self.months_due > 0:
-                Message.objects.create(
-                    owner=self.property.owner,
-                    property=self.property,
-                    content=f'Monthly payment of ${self.monthly_payment_amount} is still overdue ({self.months_due} months due). Please take action.'
-                )
-                self.save()
+        if timezone.now().day > int(self.start_date.day) and self.monthly_payment_status=='paid':
+            self.monthly_payment_status = 'pending'
+            self.save()
                 
     
     def pay(self):
@@ -110,8 +118,8 @@ class Lease(models.Model):
             return False
         
 class Problem(models.Model):
+    tenant = models.ForeignKey(User, on_delete=models.CASCADE)    
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
-    tenant = models.ForeignKey(User, on_delete=models.CASCADE)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -122,6 +130,7 @@ class Problem(models.Model):
 class Message(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_messages')
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_messages')
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='lease_messages', null=True, blank=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     

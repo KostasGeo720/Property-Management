@@ -4,7 +4,7 @@
 
 {% block content %}
   <section class="auth-card">
-    <h1>Create your account</h1>
+    <h1>Create your {% block owner %}{% endblock %} account</h1>
     <form method="post" class="form auth-form">
       {% csrf_token %}
       {{ form.non_field_errors }}

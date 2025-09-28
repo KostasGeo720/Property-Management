@@ -56,7 +56,7 @@ def create_lease(request, property_id):
 @login_required
 def report_problem(request):
     if request.method == 'POST':
-        form = NewProblemForm(request.POST)
+        form = NewProblemForm(request.POST, tenant=request.user)
         if form.is_valid():
             problem = form.save(commit=False)
             problem.tenant = request.user
@@ -66,7 +66,7 @@ def report_problem(request):
         else:
             messages.error(request, 'Error!')
     else:
-        form = NewProblemForm()
+        form = NewProblemForm(tenant=request.user)
     return render(request, 'pm/report_problem.html', {'form': form})
 
 @login_required

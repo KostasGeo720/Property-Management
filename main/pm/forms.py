@@ -39,6 +39,13 @@ class NewProblemForm(forms.ModelForm):
             'description',
             'property'
             ]
+    def __init__(self, *args, **kwargs):
+        tenant = kwargs.pop('tenant', None)
+        super().__init__(*args, **kwargs)
+        if tenant:
+            leases = Lease.objects.filter(tenant=tenant)
+            self.fields['property'].queryset = Property.objects.filter(lease__in=leases).distinct()
+
         
 class AddTenantForm(forms.ModelForm):
     tennant = forms.ModelMultipleChoiceField(
