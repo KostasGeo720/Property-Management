@@ -1,9 +1,13 @@
+import uuid
 from django.db import models
 from django.utils import timezone
+from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.conf import settings
 
 # Create your models here.
 class Property(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
     address = models.CharField(max_length=200)
     property_type = models.CharField(max_length=30, choices=[
         ('condo', 'Condo'),
@@ -18,7 +22,7 @@ class Property(models.Model):
         ('shack', 'Shack'),
         ('cottage', 'Cottage'),
         ('parking' ,'Parking')
-        ])
+    ])
     property_size = models.CharField(max_length=50)
     bedrooms = models.IntegerField()
     bathrooms = models.IntegerField()
@@ -43,6 +47,7 @@ class Property(models.Model):
         return f'{self.address}'
         
 class Lease(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     tenant = models.ManyToManyField(User, blank=True, related_name='leases', limit_choices_to={'is_staff':False})  # Add a tennant field with a related name
     start_date = models.DateField()
@@ -90,12 +95,26 @@ class Lease(models.Model):
                     property=self.property,
                     content=msg_content
                 )
+                send_mail(
+                    subject='Payment Due Notification',
+                    message=msg_content,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[self.property.owner.email],
+                    fail_silently=True,
+                )
                 for tenant in self.tenant.all():
                     Message.objects.create(
                         owner=tenant,
                         lease=self,
                         property=self.property,
                         content=msg_content
+                    )
+                    send_mail(
+                        subject='Payment Due Notification',
+                        message=msg_content,
+                        from_email=settings.EMAIL_HOST_USER,
+                        recipient_list=[tenant.email],
+                        fail_silently=True,
                     )
     def update_payment_status(self):
         # Update payment status based on months_due
@@ -122,12 +141,19 @@ class Lease(models.Model):
                 lease=self,
                 content=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.'
             )
+            send_mail(
+                subject=f'Payment Received Regarding Your Property {self.property.address}',
+                message=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.',
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[self.property.owner.email],
+                fail_silently=False,
+            )
             return True
         else:
             return False
         
 class Problem(models.Model):
-    tenant = models.ForeignKey(User, on_delete=models.CASCADE)    
+    tenant = models.ForeignKey(User, on_delete=models.CASCADE)  
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -145,6 +171,18 @@ class Message(models.Model):
     
     def __str__(self):
         return f'Message regarding {self.property} at {self.timestamp}'
+    
+class Document(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
+    title = models.CharField(max_length=200)
+    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
+    file = models.FileField(upload_to='documents/')
+    
+    def __str__(self):
+        return self.title if self.title else self.file.name
+        
+    
+
 
 class Payment(models.Model):
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='payments')

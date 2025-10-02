@@ -3,8 +3,8 @@ from django.template.defaulttags import register
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Property, Lease, Problem, Message
-from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm
+from .models import Property, Lease, Problem, Message, Document
+from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm
 
 # Create your views here.
 
@@ -12,6 +12,7 @@ def update_status(request):
     leases = Lease.objects.filter(property__owner=request.user)
     for lease in leases:
         lease.update_payment_status()
+        
 @login_required
 def home(request):
     problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
@@ -36,9 +37,6 @@ def create_property(request):
 @login_required
 def create_lease(request, property_id):
     property = Property.objects.get(id=property_id)
-    raw_ids = request.GET.get('tenants', '')
-    tenant_ids = [tid for tid in raw_ids.split(',') if tid.isdigit()]
-    tenant_list = User.objects.filter(id__in=tenant_ids) if tenant_ids else []
     if request.method == 'POST':
         form = NewLeaseForm(request.POST)
         if form.is_valid():
@@ -85,7 +83,6 @@ def manage_properties(request):
     leases = Lease.objects.filter(property__owner=request.user).order_by('-created_at')
     leased_properties = [lease.property.id for lease in leases]
     properties = Property.objects.filter(owner=request.user).order_by('-created_at')
-    lease_found = False
     return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties})
 
 @login_required
@@ -184,3 +181,22 @@ def finances(request):
     leases = Lease.objects.filter(property__owner=request.user)
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
     return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})
+
+def submit_payment(request, lease_id):
+    lease = Lease.objects.get(id=lease_id)
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.owner = request.user
+            document.lease = lease
+            document.property = lease.property
+            document.save()
+            lease.pay()
+            messages.success(request, 'Payment submitted and marked as paid successfully!')
+            return redirect('finances')
+        else:
+            messages.error(request, 'Error! Please ensure the uploaded file is a valid PDF.')
+    else:
+        form = DocumentForm()
+    return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})

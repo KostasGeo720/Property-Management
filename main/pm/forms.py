@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Property, Lease, Problem
+from .models import Property, Lease, Problem, Document
 
 class NewPropertyForm(forms.ModelForm):
     class Meta:
@@ -56,3 +56,17 @@ class AddTenantForm(forms.ModelForm):
     class Meta:
         model = Lease
         fields = ['tennant']
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['title', 'file']
+        
+    def clean_file(self):
+        file = self.cleaned_data.get('file', False)
+        if file:
+            if not file.name.endswith('.pdf'):
+                raise forms.ValidationError("Only PDF files are allowed.")
+            if file.content_type != 'application/pdf':
+                raise forms.ValidationError("Uploaded file is not a valid PDF.")
+        return file
