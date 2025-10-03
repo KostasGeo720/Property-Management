@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gits&=jj5lhoupt#a3w390doe^d*2&n2bs^a7_w17t(w&v%hwu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1','Kostas07.pythonanywhere.com', 'www.bvg.today', 'bvg.today']
 
@@ -128,5 +128,5 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'bvgkostas@gmail.com'
-EMAIL_HOST_PASSWORD = 'wdqc wnzn zksk geus'
+EMAIL_HOST_USER = 'bvgdigitalsolutions@gmail.com'
+EMAIL_HOST_PASSWORD = 'vexo derg uzlm kkcl'
