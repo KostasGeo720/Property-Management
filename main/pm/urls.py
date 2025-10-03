@@ -16,5 +16,7 @@ urlpatterns = [
     path('delete_lease/<uuid:lease_id>/', views.delete_lease, name='delete_lease'),
     path('payment_status/<uuid:lease_id>/', views.payment_status, name='payment_status'),
     path('finances/', views.finances, name='finances'),
+    path('submit_payment/<uuid:lease_id>/', views.submit_payment, name='submit_payment'),
+    path('documents/<str:document_file>/', views.documents, name='documents'),
 ]
 

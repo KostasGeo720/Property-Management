@@ -61,12 +61,13 @@ class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
         fields = ['title', 'file']
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={'accept': 'application/pdf'}),
+        }
+
         
     def clean_file(self):
-        file = self.cleaned_data.get('file', False)
-        if file:
-            if not file.name.endswith('.pdf'):
-                raise forms.ValidationError("Only PDF files are allowed.")
-            if file.content_type != 'application/pdf':
-                raise forms.ValidationError("Uploaded file is not a valid PDF.")
+        file = self.cleaned_data['file']
+        if file.content_type != 'application/pdf':
+            raise forms.ValidationError("Only PDF files are allowed.")
         return file

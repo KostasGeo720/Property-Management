@@ -182,10 +182,12 @@ def finances(request):
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
     return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})
 
+@login_required
 def submit_payment(request, lease_id):
     lease = Lease.objects.get(id=lease_id)
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
+        print(request.FILES)
         if form.is_valid():
             document = form.save(commit=False)
             document.owner = request.user
@@ -200,3 +202,8 @@ def submit_payment(request, lease_id):
     else:
         form = DocumentForm()
     return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
+
+@login_required
+def documents(request, document_file):
+    documents = Document.objects.filter(lease__property__owner=request.user).order_by('-id')
+    return render(request, 'pm/documents.html', {'documents':documents})
