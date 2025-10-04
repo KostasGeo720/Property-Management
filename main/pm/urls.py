@@ -17,6 +17,6 @@ urlpatterns = [
     path('payment_status/<uuid:lease_id>/', views.payment_status, name='payment_status'),
     path('finances/', views.finances, name='finances'),
     path('submit_payment/<uuid:lease_id>/', views.submit_payment, name='submit_payment'),
-    path('documents/<str:document_file>/', views.documents, name='documents'),
+    path('documents/', views.documents, name='documents'),
 ]
 

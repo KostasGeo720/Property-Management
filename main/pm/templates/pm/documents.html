@@ -1,0 +1,19 @@
+{% extends "pm/home.html" %}
+
+{% block title %}Uploaded Documents{% endblock %}
+
+{% block content %}
+<h2>Uploaded Documents</h2>
+<ul class="document-list">
+    {% for document in documents %}
+    <li>
+        <a href="{{ document.file.url }}">{{ document.title }}</a>
+        <small style="color: var(--muted); display: block; margin-top: 4px;">
+            Uploaded: {{ document.uploaded_at|date:"M d, Y" }}
+        </small>
+    </li>
+    {% empty %}
+    <li>No documents found.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

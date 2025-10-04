@@ -241,3 +241,39 @@ body {
   overflow-wrap: break-word;
   max-width: 100%;
 }
+
+/* Prettier document list */
+.document-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.document-list li {
+  background: var(--panel-2);
+  border-radius: 8px;
+  padding: 8px 14px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(34,211,238,0.04);
+}
+
+.document-list li:hover {
+  background: var(--panel);
+  box-shadow: 0 4px 16px rgba(34,211,238,0.10);
+}
+
+.document-list a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+  word-break: break-word;
+}
+
+.document-list a:hover {
+  color: var(--primary-600);
+  text-decoration: underline;
+}

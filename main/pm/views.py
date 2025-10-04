@@ -204,6 +204,6 @@ def submit_payment(request, lease_id):
     return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
 
 @login_required
-def documents(request, document_file):
+def documents(request):
     documents = Document.objects.filter(lease__property__owner=request.user).order_by('-id')
     return render(request, 'pm/documents.html', {'documents':documents})
