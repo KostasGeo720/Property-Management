@@ -12,7 +12,7 @@ def update_status(request):
     leases = Lease.objects.filter(property__owner=request.user)
     for lease in leases:
         lease.update_payment_status()
-        
+
 @login_required
 def home(request):
     problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
@@ -205,5 +205,5 @@ def submit_payment(request, lease_id):
 
 @login_required
 def documents(request):
-    documents = Document.objects.filter(lease__property__owner=request.user).order_by('-id')
+    documents = Document.objects.filter(lease__property__owner=request.user).order_by('-uploaded_at')
     return render(request, 'pm/documents.html', {'documents':documents})
