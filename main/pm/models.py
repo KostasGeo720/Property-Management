@@ -7,7 +7,7 @@ from django.conf import settings
 
 # Create your models here.
 class Property(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     address = models.CharField(max_length=200)
     property_type = models.CharField(max_length=30, choices=[
         ('condo', 'Condo'),
@@ -47,7 +47,7 @@ class Property(models.Model):
         return f'{self.address}'
         
 class Lease(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)
     tenant = models.ManyToManyField(User, blank=True, related_name='leases', limit_choices_to={'is_staff':False})  # Add a tennant field with a related name
     start_date = models.DateField()
@@ -173,7 +173,7 @@ class Message(models.Model):
         return f'Message regarding {self.property} at {self.timestamp}'
     
 class Document(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4(), editable=False, unique=True)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     title = models.CharField(max_length=200)
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
     file = models.FileField(upload_to='documents/')
