@@ -3,8 +3,8 @@ from django.template.defaulttags import register
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Property, Lease, Problem, Message, Document
-from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm
+from .models import Property, Lease, Problem, Message, Document, PropertyComplex
+from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm
 
 # Create your views here.
 
@@ -21,6 +21,20 @@ def home(request):
     return render(request, 'pm/home.html', {'problems':problems, 'notifications':notifications})
 
 @login_required
+def create_property_complex(request):
+    if request.method == 'POST':
+        form = NewPropertyComplexForm(request.POST)
+        if form.is_valid():
+            property_complex = form.save(commit=False)
+            property_complex.owner = request.user
+            property_complex.save()
+            messages.success(request, 'Property Complex created successfully!')
+            return redirect('home')
+    else:
+        form = NewPropertyComplexForm()
+    return render(request, 'pm/create_property_complex.html', {'form': form})
+
+@login_required
 def create_property(request):
     if request.method == 'POST':
         form = NewPropertyForm(request.POST)
@@ -30,9 +44,20 @@ def create_property(request):
             property.save()
             messages.success(request, 'Property created successfully!')
             return redirect('home')
+        else:
+            messages.error(request, 'Error! Invalid data provided.')
     else:
         form = NewPropertyForm()
     return render(request, 'pm/create_property.html', {'form': form})
+
+@login_required
+def new_property_page(request):
+    if request.method == 'POST':
+        if request.POST.get('property_type') == 'complex':
+            return redirect('create_property_complex')
+        else:
+            return redirect('create_property')
+    return render(request, 'pm/new_property_page.html')
 
 @login_required
 def create_lease(request, property_id):
@@ -83,7 +108,8 @@ def manage_properties(request):
     leases = Lease.objects.filter(property__owner=request.user).order_by('-created_at')
     leased_properties = [lease.property.id for lease in leases]
     properties = Property.objects.filter(owner=request.user).order_by('-created_at')
-    return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties})
+    complexes = PropertyComplex.objects.filter(owner=request.user).order_by('-created_at')
+    return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties, 'complexes':complexes})
 
 @login_required
 def remove_tennant(request, lease_id, tennant_id):

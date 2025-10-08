@@ -5,7 +5,34 @@
 {% block content %}
   <h2>My Properties</h2>
 
-  {% if properties %}
+  {% if properties or complexes %}
+    {% if complexes %}
+      <h3>Property Complexes</h3>
+      <div class="property-grid">
+        {% for complex in complexes %}
+          <div class="property-card">
+            <div class="property-header">
+              <h3>{{ complex.address }}</h3>
+              <span class="status available"><h2 style="color:#97f75c">COMPLEX</h2></span>
+            </div>
+            {% for unit in complex.properties.all %}
+            {{unit.address}} - {{unit.get_property_type_display}} - <button class="btn btn-outline">Manage Unit</button><br>
+            {% endfor %}
+            {% if not complex.properties.all %}
+              <p style="text-align: center;">No units added</p>
+            {% endif %}
+            <div class="property-details">
+              <div style="text-align: center; margin-top: 10px;">
+                <a href="{% url "manage_properties" %}" class="btn btn-primary">Edit Complex</a>
+                <a href="{% url "manage_properties" %}" class="btn btn-outline">Delete Complex</a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <hr style="margin: 40px 0;">
+    {% endif %}
+    <h3>Individual Properties</h3>
     <div class="property-grid">
       {% for property in properties %}
         <div class="property-card">
@@ -44,6 +71,6 @@
     <p>You haven't added any properties yet.</p>
   {% endif %}
   <div style="text-align: center; margin-top: 20px;">
-    <a href="{% url "create_property" %}" class="btn btn-primary">Add Property</a>
+    <a href="{% url "new_property_page" %}" class="btn btn-primary">Add Property</a>
   </div>
 {% endblock %}

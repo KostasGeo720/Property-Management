@@ -45,7 +45,18 @@ class Property(models.Model):
         
     def __str__(self):
         return f'{self.address}'
-        
+
+class PropertyComplex(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    address = models.CharField(max_length=200)
+    properties = models.ManyToManyField(Property, blank=True, related_name='complex')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.address
+
 class Lease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE)

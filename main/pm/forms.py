@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Property, Lease, Problem, Document
+from .models import Property, Lease, Problem, Document, PropertyComplex
 
 class NewPropertyForm(forms.ModelForm):
     class Meta:
@@ -15,6 +15,13 @@ class NewPropertyForm(forms.ModelForm):
             'amenities',
             'description',
             'status'
+            ]
+
+class NewPropertyComplexForm(forms.ModelForm):
+    class Meta:
+        model = PropertyComplex
+        fields = [
+            'address'
             ]
 
 class NewLeaseForm(forms.ModelForm):

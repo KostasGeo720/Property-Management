@@ -1,0 +1,37 @@
+{% extends "pm/base.html" %}
+{% comment %} <a href='https://pngtree.com/freepng/vector-house-icon_4013530.html'>png image from pngtree.com/</a> {% endcomment %}
+{% load static %}
+
+{% block title %}Add Property{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h1 style="text-align: center;">Choose Property type</h1>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li class="message {{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <form method="post" class="form" novalidate>
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="property-type-buttons" style="display: flex; gap: 2rem; justify-content: center; margin: 2rem 0;">
+                <button type="submit" name="property_type" value="complex" style="border: 2px solid #ccc; border-radius: 12px; background: white; cursor: pointer; padding: 1rem; transition: box-shadow 0.3s ease;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                    <img src="{% static "pm/complex.png" %}" alt="Complex" style="width: 120px; height: 120px; border-radius: 10px; margin-bottom: 1rem;">
+                    <span style="font-size: 1.2rem; font-weight: bold;">Complex</span>
+                </button>
+                <button type="submit" name="property_type" value="single" style="border: 2px solid #ccc; border-radius: 12px; background: white; cursor: pointer; padding: 1rem; transition: box-shadow 0.3s ease;">
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                    <img src="{% static "pm/house.png" %}" alt="Single" style="width: 120px; height: 120px; border-radius: 10px; margin-bottom: 1rem;">
+                    <span style="font-size: 1.2rem; font-weight: bold;">Single</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
