@@ -1,12 +1,29 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Property, Lease, Problem, Document, PropertyComplex
+from .models import Property, Lease, Problem, Document, PropertyComplex, Unit, COMPLEX_CHOICES
 
 class NewPropertyForm(forms.ModelForm):
     class Meta:
         model = Property
         fields = [
             'address',
+            'property_type',
+            'property_size',
+            'bedrooms',
+            'bathrooms',
+            'parking_spaces',
+            'amenities',
+            'description',
+            'status'
+            ]
+        
+class NewUnitForm(forms.ModelForm):
+    class Meta:
+        model = Unit
+        fields = [
+            'floor',
+            'number',
+            'nickname',
             'property_type',
             'property_size',
             'bedrooms',

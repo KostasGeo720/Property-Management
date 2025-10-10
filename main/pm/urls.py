@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('new_property_page', views.new_property_page, name='new_property_page'),
     path('create_property_complex', views.create_property_complex, name='create_property_complex'),
+    path('add_property_to_complex/<str:address>/', views.create_unit, name='add_property_to_complex'),
     path('create_property', views.create_property, name='create_property'),
     path('create_lease/<uuid:property_id>/', views.create_lease, name='create_lease'),
     path('edit_lease/<uuid:property_id>/', views.edit_lease, name='edit_lease'),

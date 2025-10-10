@@ -4,25 +4,30 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.conf import settings
-
+REGULAR_CHOICES = [
+    ('condo', 'Condo'),
+    ('apartment', 'Apartment'),
+    ('studio', 'Studio'),
+    ('house', 'House'),
+    ('townhouse', 'Townhouse'),
+    ('bungalow', 'Bungalow'),
+    ('co-op', 'Co-op'),
+    ('loft', 'Loft'),
+    ('barn', 'Barn'),
+    ('shack', 'Shack'),
+    ('cottage', 'Cottage'),
+    ('parking' ,'Parking')
+]
+COMPLEX_CHOICES = [
+    ('apartment', 'Apartment'),
+    ('studio', 'Studio'),
+    ('co-op', 'Co-op'),
+]
 # Create your models here.
-class Property(models.Model):
+
+class BaseProperty(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     address = models.CharField(max_length=200)
-    property_type = models.CharField(max_length=30, choices=[
-        ('condo', 'Condo'),
-        ('apartment', 'Apartment'),
-        ('studio', 'Studio'),
-        ('house', 'House'),
-        ('townhouse', 'Townhouse'),
-        ('bungalow', 'Bungalow'),
-        ('co-op', 'Co-op'),
-        ('loft', 'Loft'),
-        ('barn', 'Barn'),
-        ('shack', 'Shack'),
-        ('cottage', 'Cottage'),
-        ('parking' ,'Parking')
-    ])
     property_size = models.CharField(max_length=50)
     bedrooms = models.IntegerField()
     bathrooms = models.IntegerField()
@@ -30,32 +35,32 @@ class Property(models.Model):
     amenities = models.CharField(max_length=200)
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=9, choices=[('available', 'Available'), ('rented', 'Rented')])  # Add a status field with choices
+    status = models.CharField(max_length=9, choices=[('available', 'Available'), ('rented', 'Rented')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    def rent(self, tennant):
-        if self.status == 'available':
-            self.tennant = tennant
-            self.status = 'rented'
-            self.save()
-            return True
-        else:
-            return False
-        
-    def __str__(self):
-        return f'{self.address}'
 
+    class Meta:
+        abstract = True
+
+class Property(BaseProperty):
+    property_type = models.CharField(max_length=30, choices=REGULAR_CHOICES)
+    
 class PropertyComplex(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     address = models.CharField(max_length=200)
-    properties = models.ManyToManyField(Property, blank=True, related_name='complex')
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.address
+    
+class Unit(BaseProperty):
+    property_type = models.CharField(max_length=30, choices=COMPLEX_CHOICES)
+    floor = models.IntegerField()
+    number = models.IntegerField()
+    complex = models.ForeignKey(PropertyComplex, on_delete=models.CASCADE, related_name='units', null=True, blank=True)
+    nickname = models.CharField(max_length=50)
 
 class Lease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)

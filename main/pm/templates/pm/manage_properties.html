@@ -15,15 +15,17 @@
               <h3>{{ complex.address }}</h3>
               <span class="status available"><h2 style="color:#97f75c">COMPLEX</h2></span>
             </div>
-            {% for unit in complex.properties.all %}
-            {{unit.address}} - {{unit.get_property_type_display}} - <button class="btn btn-outline">Manage Unit</button><br>
+            {% for unit in units %}
+              {% if unit.complex == complex %}
+                <strong>{{unit.nickname}}</strong> - Floor:{{unit.floor}} Number:{{unit.number}} - {{unit.get_property_type_display}} - <button class="btn btn-outline">Manage Unit</button><br>
+              {% endif %}
             {% endfor %}
-            {% if not complex.properties.all %}
+            {% if not units %}
               <p style="text-align: center;">No units added</p>
             {% endif %}
             <div class="property-details">
               <div style="text-align: center; margin-top: 10px;">
-                <a href="{% url "manage_properties" %}" class="btn btn-primary">Edit Complex</a>
+                <a href="{% url "add_property_to_complex" complex.address %}" class="btn btn-primary">Add Unit</a>
                 <a href="{% url "manage_properties" %}" class="btn btn-outline">Delete Complex</a>
               </div>
             </div>

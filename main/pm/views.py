@@ -1,10 +1,9 @@
 from django.shortcuts import render, redirect
-from django.template.defaulttags import register
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Property, Lease, Problem, Message, Document, PropertyComplex
-from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm
+from .models import Property, Lease, Problem, Message, Document, PropertyComplex, Unit
+from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm, NewUnitForm
 
 # Create your views here.
 
@@ -35,6 +34,26 @@ def create_property_complex(request):
     return render(request, 'pm/create_property_complex.html', {'form': form})
 
 @login_required
+def create_unit(request, address):
+    complex_obj = PropertyComplex.objects.get(address=address)
+
+    if request.method == 'POST':
+        form = NewUnitForm(request.POST)
+        if form.is_valid():
+            unit = form.save(commit=False)
+            unit.owner = request.user
+            unit.complex = complex_obj
+            unit.save()
+            messages.success(request, 'Unit added successfully!')
+            return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error! Invalid data provided.')
+    else:
+        form = NewUnitForm()
+
+    return render(request, 'pm/create_property.html', {'form': form, 'complex': address})
+
+@login_required
 def create_property(request):
     if request.method == 'POST':
         form = NewPropertyForm(request.POST)
@@ -42,8 +61,8 @@ def create_property(request):
             property = form.save(commit=False)
             property.owner = request.user
             property.save()
-            messages.success(request, 'Property created successfully!')
-            return redirect('home')
+            messages.success(request, 'Property added successfully!')
+            return redirect('manage_properties')
         else:
             messages.error(request, 'Error! Invalid data provided.')
     else:
@@ -99,7 +118,7 @@ def report_problem(request):
 def solve_problem(request, problem_id):
     problem = Problem.objects.get(id=problem_id)
     problem.delete()
-    messages.success(request, 'Problem sarked as solved successfully!')
+    messages.success(request, 'Problem marked as solved successfully!') #Femboy Spelling Correction
     return redirect('home')
 
 @login_required
@@ -109,7 +128,8 @@ def manage_properties(request):
     leased_properties = [lease.property.id for lease in leases]
     properties = Property.objects.filter(owner=request.user).order_by('-created_at')
     complexes = PropertyComplex.objects.filter(owner=request.user).order_by('-created_at')
-    return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties, 'complexes':complexes})
+    units = Unit.objects.filter(owner=request.user).order_by('-created_at')
+    return render(request, 'pm/manage_properties.html', {'properties':properties, 'leases':leases, 'leased_properties':leased_properties, 'complexes':complexes, 'units':units})
 
 @login_required
 def remove_tennant(request, lease_id, tennant_id):
