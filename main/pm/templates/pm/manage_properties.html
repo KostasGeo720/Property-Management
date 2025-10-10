@@ -13,7 +13,7 @@
           <div class="property-card">
             <div class="property-header">
               <h3>{{ complex.address }}</h3>
-              <span class="status available"><h2 style="color:#97f75c">COMPLEX</h2></span>
+              <span class="status complex">{{ complex.units.count }} UNITS</span>
             </div>
             {% for unit in units %}
               {% if unit.complex == complex %}
