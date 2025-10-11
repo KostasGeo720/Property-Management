@@ -26,7 +26,7 @@
             <div class="property-details">
               <div style="text-align: center; margin-top: 10px;">
                 <a href="{% url "add_property_to_complex" complex.address %}" class="btn btn-primary">Add Unit</a>
-                <a href="{% url "delete_complex" complex.id %}" class="btn btn-outline">Delete Complex</a>
+                <a href="{% url "delete_complex" complex.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this complex? This action cannot be undone.')">Delete Complex</a>
               </div>
             </div>
           </div>
@@ -63,7 +63,7 @@
           </div>
           <div style="text-align: center; margin-top: 10px;">
             <a href="{% url "edit_property" property.id %}" class="btn btn-primary">Edit Property</a>
-            <a href="{% url "delete_property" property.id %}" class="btn btn-outline">Delete Property</a>
+            <a href="{% url "delete_property" property.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this property? This action cannot be undone.')">Delete Property</a>
           </div>
         </div>
       {% endfor %}

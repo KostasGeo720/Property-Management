@@ -38,6 +38,7 @@
         {% endfor %}
         <div class="form-actions">
             <button type="submit" class="btn">{% block btn %}Add Property{% endblock %}</button>
+            <a href="{% url 'manage_properties' %}" class="btn btn-outline">Cancel</a>
         </div>
     </form>
 </div>
