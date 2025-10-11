@@ -15,6 +15,7 @@ urlpatterns = [
     path('add_tennant/<uuid:property_id>/', views.add_tennant, name='add_tennant'),
     path('remove_tennant/<uuid:lease_id>/<uuid:tennant_id>/', views.remove_tennant, name='remove_tennant'),
     path('edit_property/<uuid:property_id>/', views.edit_property, name='edit_property'),
+    path('manage_unit/<uuid:unit_id>/', views.manage_unit, name='manage_unit'),
     path('delete_property/<uuid:property_id>/', views.delete_property, name='delete_property'),
     path('delete_complex/<uuid:complex_id>/', views.delete_complex, name='delete_complex'),
     path('delete_lease/<uuid:lease_id>/', views.delete_lease, name='delete_lease'),

@@ -28,7 +28,7 @@ def create_property_complex(request):
             property_complex.owner = request.user
             property_complex.save()
             messages.success(request, 'Property Complex created successfully!')
-            return redirect('home')
+            return redirect('manage_properties')
     else:
         form = NewPropertyComplexForm()
     return render(request, 'pm/create_property_complex.html', {'form': form})
@@ -51,7 +51,7 @@ def create_unit(request, address):
     else:
         form = NewUnitForm()
 
-    return render(request, 'pm/create_property.html', {'form': form, 'complex': address})
+    return render(request, 'pm/create_property.html', {'form': form, 'complex': complex_obj})
 
 @login_required
 def create_property(request):
@@ -174,6 +174,21 @@ def edit_property(request, property_id):
     else:
         form = NewPropertyForm(instance=property)
     return render(request, 'pm/edit_property.html', {'form': form})
+
+@login_required
+def manage_unit(request, unit_id):
+    unit = Unit.objects.get(id=unit_id)
+    if request.method == 'POST':
+        form = NewUnitForm(request.POST, instance=unit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Unit updated successfully!')
+            return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
+    else:
+        form = NewUnitForm(instance=unit)
+    return render(request, 'pm/manage_unit.html', {'form': form, 'unit': unit})
 
 @login_required
 def edit_lease(request, property_id):

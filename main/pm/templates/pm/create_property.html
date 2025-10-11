@@ -4,7 +4,13 @@
 
 {% block content %}
 <div class="auth-card">
-    <h1>Add New Property</h1>
+    <h1>
+        {% if complex == None %}
+        Add New Property
+        {% else %}
+        Add New Unit to {{ complex.address }}
+        {% endif %}
+    </h1>
 
     {% if messages %}
     <ul class="messages">

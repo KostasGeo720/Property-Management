@@ -17,7 +17,7 @@
             </div>
             {% for unit in units %}
               {% if unit.complex == complex %}
-                <strong>{{unit.nickname}}</strong> - Floor:{{unit.floor}} Number:{{unit.number}} - {{unit.get_property_type_display}} - <button class="btn btn-outline">Manage Unit</button><br>
+                <strong>{{unit.nickname}}</strong> - Floor:{{unit.floor}} Number:{{unit.number}} - {{unit.get_property_type_display}} - <a href="{% url 'manage_unit' unit.id %}" class="btn btn-outline">Manage Unit</a><br>
               {% endif %}
             {% endfor %}
             {% if not units %}
