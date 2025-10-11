@@ -203,6 +203,13 @@ def delete_property(request, property_id):
     return redirect('manage_properties')
 
 @login_required
+def delete_complex(request, complex_id):
+    complex = PropertyComplex.objects.get(id=complex_id)
+    complex.delete()
+    messages.success(request, 'Property Complex deleted successfully!')
+    return redirect('manage_properties')
+
+@login_required
 def delete_lease(request, lease_id):
     lease = Lease.objects.get(id=lease_id)
     lease.property.status = 'available'
