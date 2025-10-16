@@ -3,7 +3,7 @@
 {% block title %}Submit Payment{% endblock %}
 
 {% block content %}
-<h2>Submit Payment for the Lease regarding {{ lease.property.address }}</h2>
+<h2>Submit Payment for the Lease regarding {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors }}

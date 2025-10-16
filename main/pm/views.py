@@ -8,7 +8,13 @@ from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm,
 # Create your views here.
 
 def update_status(request):
-    leases = Lease.objects.filter(property__owner=request.user)
+    # Get leases for both properties and units owned by the user
+    property_leases = Lease.objects.filter(property__owner=request.user)
+    unit_leases = Lease.objects.filter(unit__owner=request.user)
+    
+    # Combine both querysets
+    leases = property_leases.union(unit_leases)
+    
     for lease in leases:
         lease.update_payment_status()
 
@@ -99,6 +105,26 @@ def create_lease(request, property_id):
     return render(request, 'pm/create_lease.html', {'form': form})
 
 @login_required
+def create_lease_unit(request, unit_id):
+    unit = Unit.objects.get(id=unit_id)
+    if request.method == 'POST':
+        form = NewLeaseForm(request.POST)
+        if form.is_valid():
+            lease = form.save(commit=False)
+            lease.unit = unit
+            lease.save()
+            form.save_m2m()
+            unit.status = 'rented'
+            unit.save()
+            messages.success(request, 'Lease created successfully!')
+            return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
+    else:
+        form = NewLeaseForm()
+    return render(request, 'pm/create_lease.html', {'form': form, 'unit': unit})
+
+@login_required
 def report_problem(request):
     if request.method == 'POST':
         form = NewProblemForm(request.POST, tenant=request.user)
@@ -178,6 +204,7 @@ def edit_property(request, property_id):
 @login_required
 def manage_unit(request, unit_id):
     unit = Unit.objects.get(id=unit_id)
+    lease = Lease.objects.filter(unit=unit).first()
     if request.method == 'POST':
         form = NewUnitForm(request.POST, instance=unit)
         if form.is_valid():
@@ -188,12 +215,32 @@ def manage_unit(request, unit_id):
             messages.error(request, 'Error!')
     else:
         form = NewUnitForm(instance=unit)
-    return render(request, 'pm/manage_unit.html', {'form': form, 'unit': unit})
+    return render(request, 'pm/manage_unit.html', {'form': form, 'unit': unit, 'lease': lease})
 
 @login_required
 def edit_lease(request, property_id):
     update_status(request)
     lease = Lease.objects.get(property__id=property_id)
+    if request.method == 'POST':
+        form = NewLeaseForm(request.POST, instance=lease)
+        if form.is_valid():
+            l = form.save(commit=False)
+            if l.tenant.count() == 0:
+                messages.error(request, 'Lease must have at least one tenant!')
+            else:
+                form.save()
+                messages.success(request, 'Lease updated successfully!')
+                return redirect('manage_properties')
+        else:
+            messages.error(request, 'Error!')
+    else:
+        form = NewLeaseForm(instance=lease)
+    return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
+
+@login_required
+def edit_lease_unit(request, unit_id):
+    update_status(request)
+    lease = Lease.objects.get(unit__id=unit_id)
     if request.method == 'POST':
         form = NewLeaseForm(request.POST, instance=lease)
         if form.is_valid():
@@ -253,7 +300,10 @@ def payment_status(request, lease_id):
 @login_required
 def finances(request):
     update_status(request)
-    leases = Lease.objects.filter(property__owner=request.user)
+    # Get leases for both properties and units owned by the user
+    property_leases = Lease.objects.filter(property__owner=request.user)
+    unit_leases = Lease.objects.filter(unit__owner=request.user)
+    leases = property_leases.union(unit_leases)
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
     return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})
 
@@ -267,7 +317,6 @@ def submit_payment(request, lease_id):
             document = form.save(commit=False)
             document.owner = request.user
             document.lease = lease
-            document.property = lease.property
             document.save()
             lease.pay()
             messages.success(request, 'Payment submitted and marked as paid successfully!')
@@ -280,5 +329,8 @@ def submit_payment(request, lease_id):
 
 @login_required
 def documents(request):
-    documents = Document.objects.filter(lease__property__owner=request.user).order_by('-uploaded_at')
+    # Get documents for both property and unit leases owned by the user
+    property_documents = Document.objects.filter(lease__property__owner=request.user)
+    unit_documents = Document.objects.filter(lease__unit__owner=request.user)
+    documents = property_documents.union(unit_documents).order_by('-uploaded_at')
     return render(request, 'pm/documents.html', {'documents':documents})

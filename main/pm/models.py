@@ -64,7 +64,8 @@ class Unit(BaseProperty):
 
 class Lease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, null=True, on_delete=models.CASCADE)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
     tenant = models.ManyToManyField(User, blank=True, related_name='leases', limit_choices_to={'is_staff':False})  # Add a tennant field with a related name
     start_date = models.DateField()
     end_date = models.DateField()
@@ -97,25 +98,28 @@ class Lease(models.Model):
     def notify_months_due(self):
         due = self.months_due()
         if due > 0:
-            msg_content = f'Lease for {self.property.address} has {due} months due (€{due*self.monthly_payment_amount} remaining).'
+            x = self.property if self.property else self.unit
+            msg_content = f'Lease for {x.address} has {due} months due (€{due*self.monthly_payment_amount} remaining).'
             identical = Message.objects.filter(
-                owner=self.property.owner,
+                owner=x.owner,
                 lease=self,
                 property=self.property,
+                unit=self.unit,
                 content=msg_content
             )
             if not identical.exists():
                 Message.objects.create(
-                    owner=self.property.owner,
+                    owner=x.owner,
                     lease=self,
                     property=self.property,
+                    unit=self.unit,
                     content=msg_content
                 )
                 send_mail(
                     subject='Payment Due Notification',
                     message=msg_content,
                     from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[self.property.owner.email],
+                    recipient_list=[x.owner.email],
                     fail_silently=True,
                 )
                 for tenant in self.tenant.all():
@@ -123,6 +127,7 @@ class Lease(models.Model):
                         owner=tenant,
                         lease=self,
                         property=self.property,
+                        unit=self.unit,
                         content=msg_content
                     )
                     send_mail(
@@ -151,17 +156,19 @@ class Lease(models.Model):
             self.save()
             self.update_payment_status()
             md = self.months_due()
+            x = self.property if self.property else self.unit
             Message.objects.create(
-                owner=self.property.owner,
+                owner=x.owner,
                 property=self.property,
+                unit=self.unit,
                 lease=self,
                 content=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.'
             )
             send_mail(
-                subject=f'Payment Received Regarding Your Property {self.property.address}',
+                subject=f'Payment Received Regarding Your Property {x.address}',
                 message=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.',
                 from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[self.property.owner.email],
+                recipient_list=[x.owner.email],
                 fail_silently=False,
             )
             return True
@@ -180,7 +187,8 @@ class Problem(models.Model):
 
 class Message(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='owned_messages')
-    property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name='property_messages')
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True, related_name='property_messages')
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, related_name='unit_messages', null=True, blank=True)
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='lease_messages', null=True, blank=True)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)

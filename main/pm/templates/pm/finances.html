@@ -12,7 +12,7 @@
                 const ctx = document.getElementById('incomePieChart').getContext('2d');
                 const propertyLabels = [
                     {% for lease in leases %}
-                        "{{ lease.property.address }}"{% if not forloop.last %},{% endif %}
+                        "{% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}"{% if not forloop.last %},{% endif %}
                     {% endfor %}
                 ];
                 const propertyIncome = [
@@ -47,7 +47,9 @@
                 {% for note in notifications|slice:":5" %}
                     <div class="notification-card">
                         <div class="notification-header">
-                            <span class="notification-title">{{ note.property.address }}</span>
+                            <span class="notification-title">
+                                {% if note.property %}{{ note.property.address }}{% else %}{{ note.unit.nickname }} - {{ note.unit.complex.address }}{% endif %}
+                            </span>
                             <span style="float:right; font-size:12px; color:var(--muted);">{{ note.timestamp|date:"M d, H:i" }}</span>
                         </div>
                         <div class="notification-body">
@@ -84,7 +86,9 @@
                             {% for lease in leases %}
                                 {% if lease.monthly_payment_status == 'pending' or lease.months_due > 0 %}
                                     <tr>
-                                        <td style="padding:6px;">{{ lease.property.address }}</td>
+                                        <td style="padding:6px;">
+                                            {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}
+                                        </td>
                                         <td style="padding:6px;">
                                             {% for tenant in lease.tenant.all %}
                                                 {{ tenant.get_full_name|default:tenant.username }}{% if not forloop.last %}, {% endif %}

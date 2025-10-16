@@ -20,7 +20,9 @@
     {% for notification in notifications %}
       <div class="notification-card">
         <div class="notification-header">
-          <h3 class="notification-title">{{notification.property}} ({{notification.timestamp}})</h3>
+          <h3 class="notification-title">
+            {% if notification.property %}{{ notification.property.address }}{% else %}{{ notification.unit.nickname }} - {{ notification.unit.complex.address }}{% endif %} ({{notification.timestamp}})
+          </h3>
         </div>
         <div class="notification-body">
           <p class="notification-message">{{ notification.content }}</p>

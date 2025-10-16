@@ -8,4 +8,9 @@
 
 {% block delete_unit %}
     <a href="{% url 'delete_unit' unit.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this unit? This action cannot be undone.')">Delete Unit</a>
+    {% if lease %}
+        <a href="{% url 'edit_lease_unit' unit.id %}" class="btn btn-outline">View Lease</a>
+    {% else %}
+        <a href="{% url 'create_lease_unit' unit.id %}" class="btn btn-outline">Create Lease</a>
+    {% endif %}
 {% endblock delete_unit %}
