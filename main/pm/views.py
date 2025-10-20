@@ -312,7 +312,6 @@ def submit_payment(request, lease_id):
     lease = Lease.objects.get(id=lease_id)
     if request.method == 'POST':
         form = DocumentForm(request.POST, request.FILES)
-        print(request.FILES)
         if form.is_valid():
             document = form.save(commit=False)
             document.owner = request.user
@@ -328,9 +327,59 @@ def submit_payment(request, lease_id):
     return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
 
 @login_required
+def request_payment(request):
+    # Get leases for both properties and units where user is a tenant
+    property_leases = Lease.objects.filter(property__isnull=False, tenant=request.user)
+    unit_leases = Lease.objects.filter(unit__isnull=False, tenant=request.user)
+    leases = property_leases.union(unit_leases).order_by('-created_at')
+    return render(request, 'pm/request_payment.html', {'leases': leases})
+
+@login_required
+def submit_payment_request(request, lease_id):
+    lease = Lease.objects.get(id=lease_id)
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            document = form.save(commit=False)
+            document.owner = request.user
+            document.lease = lease
+            document.status = 'unverified'
+            document.save()
+            messages.success(request, 'Payment request submitted successfully!')
+            return redirect('finances')
+        else:
+            messages.error(request, 'Error! Please ensure the uploaded file is a valid PDF.')
+    else:
+        form = DocumentForm()
+    return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
+
+@login_required
+def verify_payment(request, document_id):
+    document = Document.objects.get(id=document_id)
+    document.status = 'verified'
+    document.save()
+    lease = document.lease
+    lease.pay()
+    messages.success(request, 'Payment verified and marked as paid successfully!')
+    return redirect('finances')
+
+@login_required
 def documents(request):
     # Get documents for both property and unit leases owned by the user
     property_documents = Document.objects.filter(lease__property__owner=request.user)
     unit_documents = Document.objects.filter(lease__unit__owner=request.user)
-    documents = property_documents.union(unit_documents).order_by('-uploaded_at')
-    return render(request, 'pm/documents.html', {'documents':documents})
+    
+    # Separate unverified and verified documents before union
+    unverified_property_docs = property_documents.filter(status='unverified')
+    unverified_unit_docs = unit_documents.filter(status='unverified')
+    verified_property_docs = property_documents.filter(status='verified')
+    verified_unit_docs = unit_documents.filter(status='verified')
+    
+    # Union the filtered documents
+    unverified_documents = unverified_property_docs.union(unverified_unit_docs).order_by('-uploaded_at')
+    verified_documents = verified_property_docs.union(verified_unit_docs).order_by('-uploaded_at')
+    
+    return render(request, 'pm/documents.html', {
+        'unverified_documents': unverified_documents,
+        'verified_documents': verified_documents
+    })

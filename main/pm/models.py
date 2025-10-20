@@ -202,6 +202,7 @@ class Document(models.Model):
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
     file = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=10, choices=[('verified', 'Verified'), ('unverified', 'Unverified')], default='verified')
     
     def __str__(self):
         return self.title if self.title else self.file.name

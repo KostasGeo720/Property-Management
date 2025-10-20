@@ -4,16 +4,41 @@
 
 {% block content %}
 <h2>Uploaded Documents</h2>
+
+{% if unverified_documents %}
+<h3 style="color: var(--warning); margin-top: 24px;">Unverified Payment Documents</h3>
+<ul class="document-list" style="border: 2px solid var(--warning); border-radius: var(--radius); padding: 16px; margin-bottom: 32px; background: rgba(245,158,11,0.05);">
+    {% for document in unverified_documents %}
+    <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+        <div>
+            <a href="{{ document.file.url }}" style="color: var(--warning); font-weight: 600;">{{ document.title }}</a>
+            <small style="color: var(--muted); display: block; margin-top: 4px;">
+                Uploaded: {{ document.uploaded_at|date:"M d, Y" }} | 
+                Lease: {% if document.lease.property %}{{ document.lease.property.address }}{% else %}{{ document.lease.unit.nickname }} - {{ document.lease.unit.complex.address }}{% endif %}
+            </small>
+        </div>
+        <a href="{% url 'verify_payment' document.id %}" class="btn" style="margin-left: 16px; background: var(--success);">Verify Payment</a>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h3 style="margin-top: 24px;">{% if unverified_documents %}Verified Documents{% else %}All Documents{% endif %}</h3>
 <ul class="document-list">
-    {% for document in documents %}
+    {% for document in verified_documents %}
     <li>
         <a href="{{ document.file.url }}">{{ document.title }}</a>
         <small style="color: var(--muted); display: block; margin-top: 4px;">
-            Uploaded: {{ document.uploaded_at|date:"M d, Y" }}
+            Uploaded: {{ document.uploaded_at|date:"M d, Y" }} | 
+            Lease: {% if document.lease.property %}{{ document.lease.property.address }}{% else %}{{ document.lease.unit.nickname }} - {{ document.lease.unit.complex.address }}{% endif %}
         </small>
     </li>
     {% empty %}
-    <li>No documents found.</li>
+        {% if not unverified_documents %}
+        <li>No documents found.</li>
+        {% else %}
+        <li>No verified documents yet.</li>
+        {% endif %}
     {% endfor %}
 </ul>
 {% endblock %}

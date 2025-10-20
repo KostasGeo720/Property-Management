@@ -24,7 +24,10 @@ urlpatterns = [
     path('delete_lease/<uuid:lease_id>/', views.delete_lease, name='delete_lease'),
     path('payment_status/<uuid:lease_id>/', views.payment_status, name='payment_status'),
     path('finances/', views.finances, name='finances'),
+    path('request_payment/', views.request_payment, name='request_payment'),
     path('submit_payment/<uuid:lease_id>/', views.submit_payment, name='submit_payment'),
+    path('submit_payment_request/<uuid:lease_id>/', views.submit_payment_request, name='submit_payment_request'),
+    path('verify_payment/<uuid:document_id>/', views.verify_payment, name='verify_payment'),
     path('documents/', views.documents, name='documents'),
 ]
 
