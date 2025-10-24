@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Property, Lease, Problem, Document, PropertyComplex, Unit, COMPLEX_CHOICES
+from .models import Property, Lease, Problem, Document, PropertyComplex, Unit, Expense
 
 class NewPropertyForm(forms.ModelForm):
     class Meta:
@@ -95,3 +95,17 @@ class DocumentForm(forms.ModelForm):
         if file.content_type != 'application/pdf':
             raise forms.ValidationError("Only PDF files are allowed.")
         return file
+
+class ExpenseForm(forms.ModelForm):
+    class Meta:
+        model = Expense
+        fields = [
+            'category',
+            'amount',
+            'date',
+            'receipt',
+            'notes'
+        ]
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'})
+        }

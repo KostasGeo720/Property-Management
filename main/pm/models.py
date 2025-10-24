@@ -210,6 +210,36 @@ class Document(models.Model):
     
 
 
+class Expense(models.Model):
+    EXPENSE_CATEGORIES = [
+        ('maintenance', 'Maintenance'),
+        ('utilities', 'Utilities'),
+        ('insurance', 'Insurance'),
+        ('taxes', 'Property Taxes'),
+        ('repairs', 'Repairs'),
+        ('management', 'Property Management'),
+        ('legal', 'Legal Fees'),
+        ('advertising', 'Advertising'),
+        ('other', 'Other'),
+    ]
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True, related_name='expenses')
+    category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField()
+    receipt = models.FileField(upload_to='expense_receipts/', null=True, blank=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        location = self.property.address if self.property else f"{self.unit.nickname} - {self.unit.complex.address}"
+        return f"{self.category.title()} - {location}: €{self.amount}"
+    
+    def get_owner(self):
+        return self.property.owner if self.property else self.unit.owner
+
 class Payment(models.Model):
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='payments')
     amount = models.DecimalField(max_digits=10, decimal_places=2)

@@ -1,0 +1,210 @@
+{% extends "pm/home.html" %}
+
+{% block content %}
+<div class="container" style="margin-top:32px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h1 style="margin: 0; color: var(--text);">Property Expenses</h1>
+        <div style="display: flex; gap: 12px;">
+            <button onclick="exportAllExpenses()" style="background: var(--primary); color: #00303a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Export All</button>
+            <a href="{% url 'finances' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Back to Finances</a>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+        <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">{{ total_properties }}</div>
+            <div style="color: var(--muted); font-size: 14px;">Total Properties</div>
+        </div>
+        <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--danger); margin-bottom: 4px;" id="totalExpenses">€0.00</div>
+            <div style="color: var(--muted); font-size: 14px;">Total Expenses</div>
+        </div>
+        <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
+            <div style="font-size: 24px; font-weight: 700; color: var(--warning); margin-bottom: 4px;" id="avgExpenses">€0.00</div>
+            <div style="color: var(--muted); font-size: 14px;">Avg per Property</div>
+        </div>
+    </div>
+
+    <!-- Property Expense Cards -->
+    <div style="display: grid; gap: 16px;">
+        {% for item in property_data %}
+            <div class="expense-card" style="background: var(--panel-2); border-radius: var(--radius); border: 1px solid rgba(255,255,255,.08); overflow: hidden;">
+                <!-- Card Header -->
+                <div class="expense-header" onclick="toggleExpenses('{{ forloop.counter }}')" 
+                     style="padding: 20px; cursor: pointer; user-select: none; display: flex; justify-content: space-between; align-items: center; transition: background-color 0.2s;">
+                    <div>
+                        <h3 style="margin: 0 0 8px 0; color: var(--text); font-size: 18px;">
+                            {% if item.type == 'property' %}
+                                {{ item.object.address }}
+                            {% else %}
+                                {{ item.object.nickname }} - {{ item.object.complex.address }}
+                            {% endif %}
+                        </h3>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <span style="background: var(--panel-1); padding: 4px 8px; border-radius: 8px; font-size: 12px;">
+                                {% if item.type == 'property' %}
+                                    {{ item.object.property_type|capfirst }}
+                                {% else %}
+                                    Unit {{ item.object.number }} (Floor {{ item.object.floor }})
+                                {% endif %}
+                            </span>
+                            <span style="color: var(--muted); font-size: 14px;">
+                                {{ item.expenses|length }} expense{{ item.expenses|length|pluralize }}
+                            </span>
+                            <span style="color: var(--danger); font-weight: 600;">
+                                Total: €{{ item.total_expenses|floatformat:2 }}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <a href="{% url 'create_expense' %}?type={{ item.type }}&id={{ item.object.id }}" onclick="event.stopPropagation();"
+                           style="background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block;">
+                            + Add Expense
+                        </a>
+                        <span class="expand-arrow" id="arrow-{{ forloop.counter }}" style="transition: transform 0.3s; font-size: 18px;">▼</span>
+                    </div>
+                </div>
+
+                <!-- Expandable Expense Table -->
+                <div class="expense-details" id="details-{{ forloop.counter }}" style="display: none; border-top: 1px solid rgba(255,255,255,.08);">
+                    {% if item.expenses %}
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead style="background: var(--panel-1);">
+                                    <tr>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Date</th>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Category</th>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Description</th>
+                                        <th style="text-align: right; padding: 12px; font-size: 13px; color: var(--muted);">Amount</th>
+                                        <th style="text-align: center; padding: 12px; font-size: 13px; color: var(--muted);">Receipt</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for expense in item.expenses %}
+                                        <tr style="border-bottom: 1px solid rgba(255,255,255,.04);">
+                                            <td style="padding: 12px; font-size: 13px;">{{ expense.date|date:"M d, Y" }}</td>
+                                            <td style="padding: 12px;">
+                                                <span style="background: var(--panel); padding: 2px 6px; border-radius: 6px; font-size: 11px; text-transform: capitalize;">
+                                                    {{ expense.get_category_display }}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 12px; font-size: 13px;">
+                                                {{ expense.description }}
+                                                {% if expense.notes %}
+                                                    <div style="color: var(--muted); font-size: 11px; margin-top: 2px;">{{ expense.notes|truncatechars:50 }}</div>
+                                                {% endif %}
+                                            </td>
+                                            <td style="padding: 12px; text-align: right; font-weight: 600; color: var(--danger);">
+                                                €{{ expense.amount|floatformat:2 }}
+                                            </td>
+                                            <td style="padding: 12px; text-align: center;">
+                                                {% if expense.receipt %}
+                                                    <a href="{{ expense.receipt.url }}" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 12px;">📄 View</a>
+                                                {% else %}
+                                                    <span style="color: var(--muted); font-size: 12px;">—</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div style="padding: 32px; text-align: center; color: var(--muted);">
+                            <div style="font-size: 48px; margin-bottom: 12px; opacity: 0.3;">💰</div>
+                            <div>No expenses recorded for this property yet.</div>
+                            <a href="{% url 'create_expense' %}?type={{ item.type }}&id={{ item.object.id }}"
+                               style="background: var(--primary); color: #00303a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 12px; font-weight: 600; text-decoration: none; display: inline-block;">
+                                Add First Expense
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="background: var(--panel-2); padding: 48px; border-radius: var(--radius); text-align: center;">
+                <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">🏠</div>
+                <h3 style="color: var(--muted); margin-bottom: 8px;">No Properties Found</h3>
+                <p style="color: var(--muted);">You don't have any properties or units to track expenses for.</p>
+                <a href="{% url 'create_property' %}" style="background: var(--primary); color: #00303a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 16px; display: inline-block;">
+                    Add Your First Property
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Calculate and display summary statistics
+    document.addEventListener('DOMContentLoaded', function() {
+        let totalExpenses = 0;
+        {% for item in property_data %}
+            totalExpenses += {{ item.total_expenses }};
+        {% endfor %}
+        
+        const avgExpenses = {{ total_properties }} > 0 ? totalExpenses / {{ total_properties }} : 0;
+        
+        document.getElementById('totalExpenses').textContent = '€' + totalExpenses.toFixed(2);
+        document.getElementById('avgExpenses').textContent = '€' + avgExpenses.toFixed(2);
+    });
+
+    // Toggle expense details
+    function toggleExpenses(cardId) {
+        const details = document.getElementById('details-' + cardId);
+        const arrow = document.getElementById('arrow-' + cardId);
+        
+        if (details.style.display === 'none') {
+            details.style.display = 'block';
+            arrow.style.transform = 'rotate(180deg)';
+        } else {
+            details.style.display = 'none';
+            arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+
+
+
+    // Export all expenses
+    function exportAllExpenses() {
+        const tables = document.querySelectorAll('.expense-details table');
+        let csv = ['Property,Date,Category,Description,Amount,Notes'];
+        
+        tables.forEach((table, index) => {
+            const propertyName = table.closest('.expense-card').querySelector('h3').textContent.trim();
+            const rows = table.querySelectorAll('tbody tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 4) {
+                    const date = cells[0].textContent.trim();
+                    const category = cells[1].textContent.trim();
+                    const description = cells[2].textContent.trim().split('\n')[0];
+                    const amount = cells[3].textContent.trim();
+                    
+                    csv.push(`"${propertyName}","${date}","${category}","${description}","${amount}",""`);
+                }
+            });
+        });
+        
+        const csvContent = csv.join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'all_expenses_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // Add hover effects to expense cards
+    document.querySelectorAll('.expense-header').forEach(header => {
+        header.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'var(--panel-1)';
+        });
+        header.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = 'transparent';
+        });
+    });
+</script>
+{% endblock content %}

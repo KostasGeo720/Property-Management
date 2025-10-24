@@ -1,0 +1,146 @@
+{% extends "pm/home.html" %}
+
+{% block content %}
+<div class="container" style="margin-top:32px;">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h1 style="margin: 0; color: var(--text);">Add Expense</h1>
+            <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Back to Expenses</a>
+        </div>
+
+        <!-- Property/Unit Info Card -->
+        {% if property_obj or unit_obj %}
+            <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid rgba(255,255,255,.08);">
+                <h3 style="margin: 0 0 12px 0; color: var(--primary); font-size: 16px;">Adding expense for:</h3>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background: var(--panel-1); padding: 4px 8px; border-radius: 8px; font-size: 12px;">
+                        {% if property_obj %}
+                            {{ property_obj.property_type|capfirst }}
+                        {% else %}
+                            Unit {{ unit_obj.number }} (Floor {{ unit_obj.floor }})
+                        {% endif %}
+                    </div>
+                    <div style="font-weight: 500;">
+                        {% if property_obj %}
+                            {{ property_obj.address }}
+                        {% else %}
+                            {{ unit_obj.nickname }} - {{ unit_obj.complex.address }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Expense Form -->
+        <div style="background: var(--panel-2); padding: 24px; border-radius: var(--radius); border: 1px solid rgba(255,255,255,.08);">
+            <form method="post" enctype="multipart/form-data" class="form">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <label for="{{ form.category.id_for_label }}">Category</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.category.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-row">
+                        <label for="{{ form.amount.id_for_label }}">Amount (€)</label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.amount.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <label for="{{ form.date.id_for_label }}">Date</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <ul class="errorlist">
+                                {% for error in form.date.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.receipt.id_for_label }}">Receipt (optional)</label>
+                    {{ form.receipt }}
+                    <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
+                        Upload a receipt image or PDF for this expense
+                    </div>
+                    {% if form.receipt.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.receipt.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <label for="{{ form.notes.id_for_label }}">Notes (optional)</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <ul class="errorlist">
+                            {% for error in form.notes.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button type="submit" class="btn" style="flex: 1;">Add Expense</button>
+                    <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 10px 16px; border-radius: 999px; text-decoration: none; display: flex; align-items: center; justify-content: center; min-width: 100px;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Enhanced form styling */
+    .form-row select,
+    .form-row input[type="number"],
+    .form-row input[type="file"],
+    .form-row textarea {
+        width: 100%;
+        background: var(--panel);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 10px;
+        padding: 10px 12px;
+        outline: none;
+        font-family: inherit;
+    }
+    
+    .form-row select:focus,
+    .form-row input[type="number"]:focus,
+    .form-row input[type="file"]:focus,
+    .form-row textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(34,211,238,.18);
+    }
+    
+    .form-row textarea {
+        min-height: 80px;
+        resize: vertical;
+    }
+    
+    .form-row input[type="file"] {
+        padding: 8px 12px;
+    }
+</style>
+{% endblock content %}

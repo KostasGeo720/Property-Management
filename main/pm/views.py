@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from .models import Property, Lease, Problem, Message, Document, PropertyComplex, Unit
-from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm, NewUnitForm
+from .models import Property, Lease, Problem, Message, Document, PropertyComplex, Unit, Expense
+from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm, NewUnitForm, ExpenseForm
 
 # Create your views here.
 
@@ -306,6 +306,91 @@ def finances(request):
     leases = property_leases.union(unit_leases)
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
     return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})
+
+@login_required
+def create_expense(request):
+    # Get parameters from query string
+    property_type = request.GET.get('type')
+    object_id = request.GET.get('id')
+    
+    property_obj = None
+    unit_obj = None
+    
+    # Determine if it's a property or unit
+    if property_type == 'property' and object_id:
+        try:
+            property_obj = Property.objects.get(id=object_id, owner=request.user)
+        except Property.DoesNotExist:
+            messages.error(request, 'Property not found.')
+            return redirect('expenses')
+    elif property_type == 'unit' and object_id:
+        try:
+            unit_obj = Unit.objects.get(id=object_id, owner=request.user)
+        except Unit.DoesNotExist:
+            messages.error(request, 'Unit not found.')
+            return redirect('expenses')
+    
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, request.FILES)
+        if form.is_valid():
+            expense = form.save(commit=False)
+            if property_obj:
+                expense.property = property_obj
+            elif unit_obj:
+                expense.unit = unit_obj
+            else:
+                messages.error(request, 'No valid property or unit specified.')
+                return redirect('expenses')
+            expense.save()
+            messages.success(request, 'Expense recorded successfully!')
+            return redirect('expenses')
+        else:
+            messages.error(request, 'Error! Please check the form data.')
+    else:
+        form = ExpenseForm()
+    
+    context = {
+        'form': form,
+        'property_obj': property_obj,
+        'unit_obj': unit_obj,
+        'property_type': property_type
+    }
+    return render(request, 'pm/create_expense.html', context)
+
+@login_required
+def expenses(request):
+    # Get all properties and units owned by the user
+    properties = Property.objects.filter(owner=request.user)
+    units = Unit.objects.filter(owner=request.user)
+    
+    # Get all expenses for owned properties and units
+    property_expenses = Expense.objects.filter(property__owner=request.user)
+    unit_expenses = Expense.objects.filter(unit__owner=request.user)
+    
+    # Combine and organize data
+    property_data = []
+    for prop in properties:
+        expenses = property_expenses.filter(property=prop).order_by('-date')
+        property_data.append({
+            'type': 'property',
+            'object': prop,
+            'expenses': expenses,
+            'total_expenses': sum(exp.amount for exp in expenses)
+        })
+    
+    for unit in units:
+        expenses = unit_expenses.filter(unit=unit).order_by('-date')
+        property_data.append({
+            'type': 'unit',
+            'object': unit,
+            'expenses': expenses,
+            'total_expenses': sum(exp.amount for exp in expenses)
+        })
+    
+    return render(request, 'pm/expenses.html', {
+        'property_data': property_data,
+        'total_properties': len(property_data)
+    })
 
 @login_required
 def submit_payment(request, lease_id):
