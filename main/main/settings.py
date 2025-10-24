@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-gits&=jj5lhoupt#a3w390doe^d*2&n2bs^a7_w17t(w&v%hwu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1','Kostas07.pythonanywhere.com', 'www.bvg.today', 'bvg.today']
 
@@ -104,9 +104,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'el-gr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Athens'
 
 USE_I18N = True
 
