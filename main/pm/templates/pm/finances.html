@@ -87,9 +87,6 @@
                                     <div style="font-weight: 500; margin-bottom: 2px;">
                                         {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }}{% endif %}
                                     </div>
-                                    <div style="font-size: 11px; color: var(--muted);">
-                                        Owner: {{ lease.property.owner.get_full_name|default:lease.property.owner.username|truncatechars:15 }}
-                                    </div>
                                 </td>
                                 <td style="padding: 8px; text-align: center;">
                                     <span style="background: var(--panel-1); padding: 2px 6px; border-radius: 8px; font-size: 11px;">
