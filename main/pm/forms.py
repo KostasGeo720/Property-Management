@@ -14,7 +14,6 @@ class NewPropertyForm(forms.ModelForm):
             'parking_spaces',
             'amenities',
             'description',
-            'status'
             ]
         
 class NewUnitForm(forms.ModelForm):
@@ -31,7 +30,6 @@ class NewUnitForm(forms.ModelForm):
             'parking_spaces',
             'amenities',
             'description',
-            'status'
             ]
 
 class NewPropertyComplexForm(forms.ModelForm):
@@ -61,7 +59,8 @@ class NewProblemForm(forms.ModelForm):
         model = Problem
         fields = [
             'description',
-            'property'
+            'property',
+            'unit'
             ]
     def __init__(self, *args, **kwargs):
         tenant = kwargs.pop('tenant', None)
@@ -69,6 +68,7 @@ class NewProblemForm(forms.ModelForm):
         if tenant:
             leases = Lease.objects.filter(tenant=tenant)
             self.fields['property'].queryset = Property.objects.filter(lease__in=leases).distinct()
+            self.fields['unit'].queryset = Unit.objects.filter(lease__in=leases).distinct()
 
         
 class AddTenantForm(forms.ModelForm):

@@ -8,9 +8,11 @@
     <li class="nav-item"><a class="btn" href="{% url 'manage_properties' %}">Manage Properties</a></li>
     <li class="nav-item"><a class="btn" href="{% url 'finances' %}">Finance</a></li>
   {% else %}
+    {% if properties or units %}
     <li class="nav-item"><a class="btn" href="{% url 'report_problem' %}">Report Problem</a></li>
     <li class="nav-item"><a class="btn" href="{% url 'request_payment' %}">Request Payment</a></li>
-  {% endif %}
+    {% endif %}
+    {% endif %}
 {% endblock %}
 
 {% block content %}
@@ -42,7 +44,11 @@
         <h3 class="problem-title">Reported by: {{ problem.tenant }}</h3>
         </div>
         <div class="problem-body">
+        {% if problem.property %}
         <h2>Address: {{ problem.property }}</h2>
+        {% else %}
+        <h2>Unit: {{ problem.unit }}</h2>
+        {% endif %}
         <p class="problem-description">{{ problem.description }}</p>
         </div>
         <div class="form-actions">

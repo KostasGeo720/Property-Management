@@ -35,7 +35,7 @@ class BaseProperty(models.Model):
     amenities = models.CharField(max_length=200)
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=9, choices=[('available', 'Available'), ('rented', 'Rented')])
+    status = models.CharField(max_length=9, choices=[('available', 'Available'), ('rented', 'Rented')], default='available')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -44,6 +44,9 @@ class BaseProperty(models.Model):
 
 class Property(BaseProperty):
     property_type = models.CharField(max_length=30, choices=REGULAR_CHOICES)
+    
+    def __str__(self):
+        return self.address
     
 class PropertyComplex(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -61,6 +64,9 @@ class Unit(BaseProperty):
     number = models.IntegerField()
     complex = models.ForeignKey(PropertyComplex, on_delete=models.CASCADE, related_name='units', null=True, blank=True)
     nickname = models.CharField(max_length=50)
+    
+    def __str__(self):
+        return f'{self.nickname} - {self.complex.address}'
 
 class Lease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -177,10 +183,27 @@ class Lease(models.Model):
         
 class Problem(models.Model):
     tenant = models.ForeignKey(User, on_delete=models.CASCADE)  
-    property = models.ForeignKey(Property, on_delete=models.CASCADE)
+    property = models.ForeignKey(Property, on_delete=models.CASCADE, null=True, blank=True)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    def delete(self, *args, **kwargs):
+        Message.objects.create(
+            owner=self.tenant,
+            property=self.property,
+            unit=self.unit,
+            content=f'Problem described as: \n{self.description} \nhas been resolved.'
+        )
+        send_mail(
+            subject='Problem Resolved Notification',
+            message=f'Problem described as: \n{self.description} \nhas been resolved.',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[self.tenant.email],
+            fail_silently=True,
+        )
+        super().delete(*args, **kwargs)
     
     def __str__(self):
         return f'{self.tenant}|{self.property}'
@@ -204,11 +227,25 @@ class Document(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=[('verified', 'Verified'), ('unverified', 'Unverified')], default='verified')
     
+    def verify(self):
+        self.status = 'verified'
+        for tenant in self.lease.tenant.all():
+            Message.objects.create(
+                owner=tenant,
+                property=self.lease.property,
+                unit=self.lease.unit,
+                content=f'Document "{self.title}" has been verified.'
+            )
+            send_mail(
+                subject='Document Verified Notification',
+                message=f'Document "{self.title}" has been verified.',
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[tenant.email],
+                fail_silently=True,
+            )
+
     def __str__(self):
         return self.title if self.title else self.file.name
-        
-    
-
 
 class Expense(models.Model):
     EXPENSE_CATEGORIES = [
@@ -239,20 +276,3 @@ class Expense(models.Model):
     
     def get_owner(self):
         return self.property.owner if self.property else self.unit.owner
-
-class Payment(models.Model):
-    lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='payments')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date_paid = models.DateTimeField(default=timezone.now)
-    payment_method = models.CharField(max_length=32, choices=[
-        ('stripe', 'Stripe'),
-        ('bank_transfer', 'Bank Transfer'),
-        ('cash', 'Cash'),
-    ])
-    payment_reference = models.CharField(max_length=255, blank=True)
-    receipt_url = models.URLField(blank=True, null=True)
-    is_confirmed = models.BooleanField(default=False)
-    notes = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"Payment for Lease {self.lease.id}: {self.amount}"

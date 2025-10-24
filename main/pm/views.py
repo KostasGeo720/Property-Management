@@ -21,10 +21,14 @@ def update_status(request):
 
 @login_required
 def home(request):
-    problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
+    property_problems = Problem.objects.filter(property__owner=request.user).order_by('-created_at')
+    unit_problems = Problem.objects.filter(unit__owner=request.user).order_by('-created_at')
+    problems = property_problems | unit_problems
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
+    properties = Property.objects.filter(lease__tenant=request.user).distinct()
+    units = Unit.objects.filter(lease__tenant=request.user).distinct()
     update_status(request)
-    return render(request, 'pm/home.html', {'problems':problems, 'notifications':notifications})
+    return render(request, 'pm/home.html', {'problems':problems, 'notifications':notifications, 'properties': properties, 'units': units})
 
 @login_required
 def create_property_complex(request):
@@ -127,6 +131,8 @@ def create_lease_unit(request, unit_id):
 
 @login_required
 def report_problem(request):
+    properties = Property.objects.filter(lease__tenant=request.user).distinct()
+    units = Unit.objects.filter(lease__tenant=request.user).distinct()
     if request.method == 'POST':
         form = NewProblemForm(request.POST, tenant=request.user)
         if form.is_valid():
@@ -139,7 +145,7 @@ def report_problem(request):
             messages.error(request, 'Error!')
     else:
         form = NewProblemForm(tenant=request.user)
-    return render(request, 'pm/report_problem.html', {'form': form})
+    return render(request, 'pm/report_problem.html', {'form': form, 'properties': properties, 'units': units})
 
 @login_required
 def solve_problem(request, problem_id):
@@ -452,7 +458,7 @@ def submit_payment_request(request, lease_id):
 @login_required
 def verify_payment(request, document_id):
     document = Document.objects.get(id=document_id)
-    document.status = 'verified'
+    document.verify()
     document.save()
     lease = document.lease
     lease.pay()
