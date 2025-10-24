@@ -72,7 +72,7 @@ class Lease(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     property = models.ForeignKey(Property, null=True, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
-    tenant = models.ManyToManyField(User, blank=True, related_name='leases', limit_choices_to={'is_staff':False})  # Add a tennant field with a related name
+    tenant = models.ManyToManyField(User, blank=True, related_name='leases', limit_choices_to={'is_staff':False})
     start_date = models.DateField()
     end_date = models.DateField()
     amount_paid = models.DecimalField(max_digits=10, default=0, decimal_places=2)

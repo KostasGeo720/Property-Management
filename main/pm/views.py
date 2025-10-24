@@ -93,7 +93,7 @@ def new_property_page(request):
 def create_lease(request, property_id):
     property = Property.objects.get(id=property_id)
     if request.method == 'POST':
-        form = NewLeaseForm(request.POST)
+        form = NewLeaseForm(request.POST, landlord_user=request.user)
         if form.is_valid():
             lease = form.save(commit=False)
             lease.property = property
@@ -106,14 +106,14 @@ def create_lease(request, property_id):
         else:
             messages.error(request, 'Error!')
     else:
-        form = NewLeaseForm()
+        form = NewLeaseForm(landlord_user=request.user)
     return render(request, 'pm/create_lease.html', {'form': form})
 
 @login_required
 def create_lease_unit(request, unit_id):
     unit = Unit.objects.get(id=unit_id)
     if request.method == 'POST':
-        form = NewLeaseForm(request.POST)
+        form = NewLeaseForm(request.POST, landlord_user=request.user)
         if form.is_valid():
             lease = form.save(commit=False)
             lease.unit = unit
@@ -126,7 +126,7 @@ def create_lease_unit(request, unit_id):
         else:
             messages.error(request, 'Error!')
     else:
-        form = NewLeaseForm()
+        form = NewLeaseForm(landlord_user=request.user)
     return render(request, 'pm/create_lease.html', {'form': form, 'unit': unit})
 
 @login_required
@@ -229,7 +229,7 @@ def edit_lease(request, property_id):
     update_status(request)
     lease = Lease.objects.get(property__id=property_id)
     if request.method == 'POST':
-        form = NewLeaseForm(request.POST, instance=lease)
+        form = NewLeaseForm(request.POST, instance=lease, landlord_user=request.user)
         if form.is_valid():
             l = form.save(commit=False)
             if l.tenant.count() == 0:
@@ -241,7 +241,7 @@ def edit_lease(request, property_id):
         else:
             messages.error(request, 'Error!')
     else:
-        form = NewLeaseForm(instance=lease)
+        form = NewLeaseForm(instance=lease, landlord_user=request.user)
     return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
 
 @login_required
@@ -249,7 +249,7 @@ def edit_lease_unit(request, unit_id):
     update_status(request)
     lease = Lease.objects.get(unit__id=unit_id)
     if request.method == 'POST':
-        form = NewLeaseForm(request.POST, instance=lease)
+        form = NewLeaseForm(request.POST, instance=lease, landlord_user=request.user)
         if form.is_valid():
             l = form.save(commit=False)
             if l.tenant.count() == 0:
@@ -261,7 +261,7 @@ def edit_lease_unit(request, unit_id):
         else:
             messages.error(request, 'Error!')
     else:
-        form = NewLeaseForm(instance=lease)
+        form = NewLeaseForm(instance=lease, landlord_user=request.user)
     return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
 
 @login_required
