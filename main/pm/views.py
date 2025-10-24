@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.db import models
 from .models import Property, Lease, Problem, Message, Document, PropertyComplex, Unit, Expense
 from .forms import NewPropertyForm, NewLeaseForm, NewProblemForm, AddTenantForm, DocumentForm, NewPropertyComplexForm, NewUnitForm, ExpenseForm
 
@@ -305,7 +306,17 @@ def finances(request):
     unit_leases = Lease.objects.filter(unit__owner=request.user)
     leases = property_leases.union(unit_leases)
     notifications = Message.objects.filter(owner=request.user).order_by('-timestamp')
-    return render(request, 'pm/finances.html', {'leases':leases, 'notifications':notifications})
+    
+    # Get recent expenses for the user
+    recent_expenses = Expense.objects.filter(
+        models.Q(property__owner=request.user) | models.Q(unit__owner=request.user)
+    ).order_by('-date')[:10]  # Get last 10 expenses
+    
+    return render(request, 'pm/finances.html', {
+        'leases': leases, 
+        'notifications': notifications,
+        'recent_expenses': recent_expenses
+    })
 
 @login_required
 def create_expense(request):
