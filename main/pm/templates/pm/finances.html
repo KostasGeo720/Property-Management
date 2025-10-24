@@ -62,11 +62,107 @@
             {% endif %}
         </div>
 
-        <!-- Bottom Left: Placeholder -->
+        <!-- Bottom Left: Property Overview Spreadsheet -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
-            <h2 style="margin-top:0;">Coming Soon</h2>
-            <p style="color:var(--muted);">Additional financial features will appear here.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h2 style="margin: 0;">Property Overview</h2>
+                <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Export</button>
+            </div>
+            
+            <div style="max-height: 260px; overflow-y: auto;">
+                <table id="propertySpreadsheet" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead style="sticky; top: 0; background: var(--panel-1); z-index: 1;">
+                        <tr>
+                            <th style="text-align: left; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Property</th>
+                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Type</th>
+                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Monthly</th>
+                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Paid</th>
+                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lease in leases %}
+                            <tr style="border-bottom: 1px solid rgba(255,255,255,.06);">
+                                <td style="padding: 8px;">
+                                    <div style="font-weight: 500; margin-bottom: 2px;">
+                                        {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }}{% endif %}
+                                    </div>
+                                    <div style="font-size: 11px; color: var(--muted);">
+                                        Owner: {{ lease.property.owner.get_full_name|default:lease.property.owner.username|truncatechars:15 }}
+                                    </div>
+                                </td>
+                                <td style="padding: 8px; text-align: center;">
+                                    <span style="background: var(--panel-1); padding: 2px 6px; border-radius: 8px; font-size: 11px;">
+                                        {% if lease.property %}{{ lease.property.property_type|capfirst }}{% else %}Unit{% endif %}
+                                    </span>
+                                </td>
+                                <td style="padding: 8px; text-align: right; font-weight: 500;">€{{ lease.monthly_payment_amount|floatformat:2 }}</td>
+                                <td style="padding: 8px; text-align: right; color: var(--success);">€{{ lease.amount_paid|floatformat:2 }}</td>
+                                <td style="padding: 8px; text-align: center;">
+                                    <span class="status-badge status-{{ lease.monthly_payment_status }}">
+                                        {{ lease.monthly_payment_status|capfirst }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" style="padding: 24px; text-align: center; color: var(--muted);">No properties available</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Summary Row -->
+            <div style="margin-top: 16px; padding: 12px; border-top: 2px solid rgba(255,255,255,.08); background: var(--panel-1); border-radius: 8px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 13px;">
+                    <div style="text-align: center;">
+                        <div style="color: var(--muted); margin-bottom: 4px;">Total Properties</div>
+                        <div style="font-weight: 600; color: var(--primary);">{{ leases|length }}</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: var(--muted); margin-bottom: 4px;">Monthly Income</div>
+                        <div style="font-weight: 600; color: var(--success);">€<span id="totalIncome">0.00</span></div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="color: var(--muted); margin-bottom: 4px;">Total Collected</div>
+                        <div style="font-weight: 600; color: var(--text);">€<span id="totalCollected">0.00</span></div>
+                    </div>
+                </div>
+            </div>
+            <a href="{% url 'expenses' %}" style="display:inline-block; margin-top:12px; color:var(--primary); text-decoration:none;">View Expenses</a>
         </div>
+
+        <script>
+            // Simple calculations and export - minimal JS
+            document.addEventListener('DOMContentLoaded', function() {
+                let totalIncome = 0, totalCollected = 0;
+                {% for lease in leases %}
+                    totalIncome += {{ lease.monthly_payment_amount }};
+                    totalCollected += {{ lease.amount_paid }};
+                {% endfor %}
+                document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+                document.getElementById('totalCollected').textContent = totalCollected.toFixed(2);
+            });
+            
+            function exportSpreadsheet() {
+                const table = document.getElementById('propertySpreadsheet');
+                const rows = Array.from(table.rows);
+                const csv = rows.map(row => 
+                    Array.from(row.cells).map(cell => 
+                        '"' + cell.textContent.trim().replace(/"/g, '""') + '"'
+                    ).join(',')
+                ).join('\n');
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'properties_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        </script>
 
         <!-- Bottom Right: Payments Due -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">

@@ -277,3 +277,13 @@ body {
   color: var(--primary-600);
   text-decoration: underline;
 }
+
+/* Status badges for spreadsheet */
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.status-paid { background: var(--success); color: white; }
+.status-pending { background: var(--warning); color: black; }
