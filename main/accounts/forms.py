@@ -9,6 +9,12 @@ class LandlordCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+        labels = {
+            'username': 'Όνομα χρήστη',
+            'email': 'Ηλεκτρονικό ταχυδρομείο',
+            'password1': 'Κωδικός',
+            'password2': 'Επιβεβαίωση Κωδικού',
+        }
 
     def save(self, commit=True):
         user = super().save(commit=False)
@@ -26,6 +32,13 @@ class TenantCreationForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2', 'landlord']
+        labels = {
+            'username': 'Όνομα χρήστη',
+            'email': 'Ηλεκτρονικό ταχυδρομείο',
+            'password1': 'Κωδικός',
+            'password2': 'Επιβεβαίωση Κωδικού',
+            'landlord': 'Ιδιοκτήτης',
+        }
 
     def save(self, commit=True):
         user = super().save(commit=False)

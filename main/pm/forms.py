@@ -16,6 +16,16 @@ class NewPropertyForm(forms.ModelForm):
             'amenities',
             'description',
             ]
+        labels = {
+            'address': 'Διεύθυνση',
+            'property_type': 'Τύπος Ακινήτου',
+            'property_size': 'Μέγεθος',
+            'bedrooms': 'Υπνοδωμάτια',
+            'bathrooms': 'Μπάνια',
+            'parking_spaces': 'Θέσεις Στάθμευσης',
+            'amenities': 'Παροχές',
+            'description': 'Περιγραφή',
+        }
         
 class NewUnitForm(forms.ModelForm):
     class Meta:
@@ -32,6 +42,18 @@ class NewUnitForm(forms.ModelForm):
             'amenities',
             'description',
             ]
+        labels = {
+            'floor': 'Όροφος',
+            'number': 'Αριθμός',
+            'nickname': 'Ψευδώνυμο',
+            'property_type': 'Τύπος Μονάδας',
+            'property_size': 'Μέγεθος',
+            'bedrooms': 'Υπνοδωμάτια',
+            'bathrooms': 'Μπάνια',
+            'parking_spaces': 'Θέσεις Στάθμευσης',
+            'amenities': 'Παροχές',
+            'description': 'Περιγραφή',
+        }
 
 class NewPropertyComplexForm(forms.ModelForm):
     class Meta:
@@ -39,6 +61,9 @@ class NewPropertyComplexForm(forms.ModelForm):
         fields = [
             'address'
             ]
+        labels = {
+            'address': 'Διεύθυνση',
+        }
 
 class NewLeaseForm(forms.ModelForm):
     class Meta:
@@ -53,6 +78,12 @@ class NewLeaseForm(forms.ModelForm):
             'tenant': forms.CheckboxSelectMultiple(),
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'})
+        }
+        labels = {
+            'tenant': 'Ενοικιαστής',
+            'start_date': 'Ημερομηνία έναρξης',
+            'end_date': 'Ημερομηνία λήξης',
+            'monthly_payment_amount': 'Μηνιαίο Ποσό Πληρωμής',
         }
     
     def __init__(self, *args, **kwargs):
@@ -84,6 +115,11 @@ class NewProblemForm(forms.ModelForm):
             'property',
             'unit'
             ]
+        labels = {
+            'description': 'Περιγραφή',
+            'property': 'Ακίνητο',
+            'unit': 'Μονάδα',
+        }
     def __init__(self, *args, **kwargs):
         tenant = kwargs.pop('tenant', None)
         super().__init__(*args, **kwargs)
@@ -96,12 +132,16 @@ class NewProblemForm(forms.ModelForm):
 class AddTenantForm(forms.ModelForm):
     tennant = forms.ModelMultipleChoiceField(
         queryset=User.objects.filter(is_staff=False),
-        widget=forms.CheckboxSelectMultiple()
+        widget=forms.CheckboxSelectMultiple(),
+        label='Ενοικιαστές'
     )
 
     class Meta:
         model = Lease
         fields = ['tennant']
+        labels = {
+            'tennant': 'Ενοικιαστές'
+        }
 
 class DocumentForm(forms.ModelForm):
     class Meta:
@@ -109,6 +149,10 @@ class DocumentForm(forms.ModelForm):
         fields = ['title', 'file']
         widgets = {
             'file': forms.ClearableFileInput(attrs={'accept': 'application/pdf'}),
+        }
+        labels = {
+            'title': 'Τίτλος',
+            'file': 'Αρχείο',
         }
 
         
@@ -130,4 +174,11 @@ class ExpenseForm(forms.ModelForm):
         ]
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'})
+        }
+        labels = {
+            'category': 'Κατηγορία',
+            'amount': 'Ποσό',
+            'date': 'Ημερομηνία',
+            'receipt': 'Απόδειξη',
+            'notes': 'Σημειώσεις',
         }

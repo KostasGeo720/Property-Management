@@ -67,8 +67,8 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h2 style="margin: 0;">Επισκόπηση Ακινήτων</h2>
                 <div style="display: flex; gap: 8px;">
-                    <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Εξαγωγή Εσόδων</button>
-                    <button onclick="exportFinancialReport()" style="background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Οικονομικός Απολογισμός</button>
+                    <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;" type="button">Εξαγωγή Εσόδων</button>
+                    <button onclick="exportFinancialReport()" style="background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;" type="button">Οικονομικός Απολογισμός</button>
                 </div>
             </div>
             
@@ -121,7 +121,7 @@
                         <div style="font-weight: 600; color: var(--primary);">{{ leases|length }}</div>
                     </div>
                     <div style="text-align: center;">
-                        <div style="color: var(--muted); margin-bottom: 4px;">Μηνιαίο Εισόδημα</div>
+                        <div style="color: var(--muted); margin-bottom: 4px;">Μηνιαία Έσοδα</div>
                         <div style="font-weight: 600; color: var(--success);">€<span id="totalIncome">0.00</span></div>
                     </div>
                     <div style="text-align: center;">
@@ -135,8 +135,8 @@
             <!-- Recent Expenses Overview -->
             <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 16px; color: var(--text);">Πρόσφατες Έξοδα</h3>
-                    <span style="font-size: 12px; color: var(--muted);">Τελευταίες 10 έξοδα</span>
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text);">Πρόσφατα Έξοδα</h3>
+                    <span style="font-size: 12px; color: var(--muted);">Τελευταία 10 έξοδα</span>
                 </div>
                 
                 {% if recent_expenses %}
@@ -213,164 +213,7 @@
                     expensesElement.textContent = '€' + totalRecentExpenses.toFixed(2);
                 }
             });
-            
-            function exportSpreadsheet() {
-                const table = document.getElementById('propertySpreadsheet');
-                const rows = Array.from(table.rows);
-                const csv = rows.map(row => 
-                    Array.from(row.cells).map(cell => 
-                        '"' + cell.textContent.trim().replace(/"/g, '""') + '"'
-                    ).join(',')
-                ).join('\n');
-                
-                // Add BOM for Excel compatibility with Greek characters
-                const BOM = '\uFEFF';
-                const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'properties_' + new Date().toISOString().split('T')[0] + '.csv';
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-            
-            function exportFinancialReport() {
-                // Create comprehensive financial report grouped by property
-                let csv = [];
-                
-                // Header section
-                csv.push('"Οικονομικός Απολογισμός","' + new Date().toLocaleDateString('el-GR') + '","","","",""');
-                csv.push('"","","","","",""');
-                csv.push('"Τύπος","Ημερομηνία","Κατηγορία","Περιγραφή","Ποσό","Σημειώσεις"');
-                csv.push('"","","","","",""');
-                
-                // Get income data from property spreadsheet
-                const propertyTable = document.getElementById('propertySpreadsheet');
-                const propertyRows = Array.from(propertyTable.rows).slice(1); // Skip header
-                
-                let grandTotalIncome = 0;
-                let grandTotalExpenses = 0;
-                
-                // Group data by property
-                const propertyData = {};
-                
-                // First, collect income data for each property
-                propertyRows.forEach(row => {
-                    const cells = Array.from(row.cells);
-                    if (cells.length >= 5) {
-                        const property = cells[0].textContent.trim();
-                        const propertyType = cells[1].textContent.trim();
-                        const monthlyRent = cells[2].textContent.trim();
-                        const collected = cells[3].textContent.trim();
-                        const status = cells[4].textContent.trim();
-                        
-                        if (!propertyData[property]) {
-                            propertyData[property] = {
-                                income: [],
-                                expenses: [],
-                                totalIncome: 0,
-                                totalExpenses: 0
-                            };
-                        }
-                        
-                        const collectedAmount = parseFloat(collected.replace(/[€,]/g, '')) || 0;
-                        const monthlyAmount = parseFloat(monthlyRent.replace(/[€,]/g, '')) || 0;
-                        
-                        propertyData[property].income.push({
-                            type: 'Εισόδημα',
-                            date: 'Μηνιαίο',
-                            category: 'Μίσθωμα',
-                            description: `Τύπος: ${propertyType}`,
-                            amount: collectedAmount,
-                            notes: `Κατάσταση: ${status}`
-                        });
-                        
-                        propertyData[property].totalIncome += collectedAmount;
-                        grandTotalIncome += collectedAmount;
-                    }
-                });
-                
-                // Add expenses data to properties
-                {% if recent_expenses %}
-                    {% for expense in recent_expenses %}
-                        const propertyName = "{% if expense.property %}{{ expense.property.address|escapejs }}{% else %}{{ expense.unit.nickname|escapejs }} - {{ expense.unit.complex.address|escapejs }}{% endif %}";
-                        
-                        if (!propertyData[propertyName]) {
-                            propertyData[propertyName] = {
-                                income: [],
-                                expenses: [],
-                                totalIncome: 0,
-                                totalExpenses: 0
-                            };
-                        }
-                        
-                        const expenseAmount = {{ expense.amount }};
-                        propertyData[propertyName].expenses.push({
-                            type: 'Έξοδο',
-                            date: '{{ expense.date|date:"d/m/Y" }}',
-                            category: '{{ expense.category|escapejs }}',
-                            description: '{{ expense.description|escapejs }}',
-                            amount: expenseAmount,
-                            notes: '{% if expense.notes %}{{ expense.notes|escapejs }}{% endif %}'
-                        });
-                        
-                        propertyData[propertyName].totalExpenses += expenseAmount;
-                        grandTotalExpenses += expenseAmount;
-                    {% endfor %}
-                {% endif %}
-                
-                // Output data grouped by property
-                Object.keys(propertyData).forEach(propertyName => {
-                    const data = propertyData[propertyName];
-                    
-                    // Property header
-                    csv.push(`"=== ${propertyName} ===","","","","",""`);
-                    
-                    // Income entries for this property
-                    if (data.income.length > 0) {
-                        csv.push('"--- ΕΙΣΟΔΗΜΑΤΑ ---","","","","",""');
-                        data.income.forEach(item => {
-                            csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
-                        });
-                        csv.push(`"Σύνολο Εισοδήματος","","","","€${data.totalIncome.toFixed(2)}",""`);
-                    }
-                    
-                    // Expenses entries for this property
-                    if (data.expenses.length > 0) {
-                        csv.push('"--- ΕΞΟΔΑ ---","","","","",""');
-                        data.expenses.forEach(item => {
-                            csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
-                        });
-                        csv.push(`"Σύνολο Εξόδων","","","","€${data.totalExpenses.toFixed(2)}",""`);
-                    }
-                    
-                    // Property net result
-                    const netResult = data.totalIncome - data.totalExpenses;
-                    csv.push(`"Καθαρό Αποτέλεσμα","","","","€${netResult.toFixed(2)}","${netResult >= 0 ? 'Κέρδος' : 'Ζημία'}"`);
-                    csv.push('"","","","","",""'); // Empty line between properties
-                });
-                
-                // Grand totals
-                csv.push('"","","","","",""');
-                csv.push('"=== ΣΥΝΟΛΙΚΟΣ ΑΠΟΛΟΓΙΣΜΟΣ ===","","","","",""');
-                csv.push(`"Συνολικά Εισοδήματα","","","","€${grandTotalIncome.toFixed(2)}",""`);
-                csv.push(`"Συνολικά Έξοδα","","","","€${grandTotalExpenses.toFixed(2)}",""`);
-                const grandNetResult = grandTotalIncome - grandTotalExpenses;
-                csv.push(`"Καθαρό Συνολικό Αποτέλεσμα","","","","€${grandNetResult.toFixed(2)}","${grandNetResult >= 0 ? 'Συνολικό Κέρδος' : 'Συνολική Ζημία'}"`);
-                
-                // Create and download file
-                const BOM = '\uFEFF'; // Add BOM for Excel compatibility with Greek characters
-                const blob = new Blob([BOM + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'financial_report_by_property_' + new Date().toISOString().split('T')[0] + '.csv';
-                a.click();
-                URL.revokeObjectURL(url);
-            }
-        </script>
-
-        <!-- Bottom Right: Payments Due -->
+        </script>        <!-- Bottom Right: Payments Due -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
             <h2 style="margin-top:0;">Πληρωμές προς Είσπραξη</h2>
             {% with due_leases=leases|dictsort:"monthly_payment_status" %}
@@ -420,4 +263,225 @@
         </div>
     </div>
 </div>
+
+<script>
+// Global functions for CSV export
+function parseAmount(amountText) {
+    // Remove all non-numeric characters except decimal point
+    const cleanAmount = amountText.replace(/[^\d.,]/g, '');
+    // Handle European decimal format (comma as decimal separator)
+    const normalizedAmount = cleanAmount.replace(',', '.');
+    // Remove any extra dots except the last one
+    const parts = normalizedAmount.split('.');
+    if (parts.length > 2) {
+        // If multiple dots, keep only the last one as decimal
+        const integerPart = parts.slice(0, -1).join('');
+        const decimalPart = parts[parts.length - 1];
+        return parseFloat(integerPart + '.' + decimalPart) || 0;
+    }
+    return parseFloat(normalizedAmount) || 0;
+}
+
+function exportSpreadsheet() {
+    try {
+        const table = document.getElementById('propertySpreadsheet');
+        if (!table) {
+            alert('Πίνακας δεν βρέθηκε');
+            return;
+        }
+        const rows = Array.from(table.rows);
+        const csv = rows.map(row => 
+            Array.from(row.cells).map(cell => 
+                '"' + cell.textContent.trim().replace(/"/g, '""') + '"'
+            ).join(',')
+        ).join('\n');
+        
+        // Add BOM for Excel compatibility with Greek characters
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'properties_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Σφάλμα κατά την εξαγωγή: ' + error.message);
+    }
+}
+
+function exportFinancialReport() {
+    try {
+        // Create comprehensive financial report grouped by property
+        let csv = [];
+        
+        // Header section
+        csv.push('"Οικονομικός Απολογισμός","' + new Date().toLocaleDateString('el-GR') + '","","","",""');
+        csv.push('"","","","","",""');
+        csv.push('"Τύπος","Τύπος/Ημερομηνία","Κατηγορία","Περιγραφή","Ποσό","Σημειώσεις"');
+        csv.push('"","","","","",""');
+        
+        let grandTotalIncome = 0;
+        let grandTotalExpenses = 0;
+        const propertyData = {};
+        
+        // Get income data from property spreadsheet
+        const propertyTable = document.getElementById('propertySpreadsheet');
+        if (propertyTable) {
+            const propertyRows = Array.from(propertyTable.rows).slice(1); // Skip header
+            
+            propertyRows.forEach(row => {
+                const cells = Array.from(row.cells);
+                if (cells.length >= 5) {
+                    const property = cells[0].textContent.trim();
+                    const propertyType = cells[1].textContent.trim();
+                    const monthlyRent = cells[2].textContent.trim();
+                    const collected = cells[3].textContent.trim();
+                    const status = cells[4].textContent.trim();
+                    
+                    if (!propertyData[property]) {
+                        propertyData[property] = {
+                            income: [],
+                            expenses: [],
+                            totalIncome: 0,
+                            totalExpenses: 0
+                        };
+                    }
+                    
+                    const collectedAmount = parseAmount(collected);
+                    
+                    if (collectedAmount > 0) {
+                        propertyData[property].income.push({
+                            type: 'Έσοδο',
+                            date: 'Μηνιαίο',
+                            category: 'Μίσθωμα',
+                            description: `${property} (${propertyType})`,
+                            amount: collectedAmount,
+                            notes: `Κατάσταση: ${status}`
+                        });
+                        
+                        propertyData[property].totalIncome += collectedAmount;
+                        grandTotalIncome += collectedAmount;
+                    }
+                }
+            });
+        }
+        
+        // Get expenses data from recent expenses table
+        const expenseTables = document.querySelectorAll('table');
+        expenseTables.forEach(table => {
+            const headerCells = table.querySelectorAll('th');
+            // Check if this is the expenses table by looking for specific headers
+            const hasExpenseHeaders = Array.from(headerCells).some(th => 
+                th.textContent.includes('Ημερομηνία') && 
+                Array.from(headerCells).some(th2 => th2.textContent.includes('Κατηγορία'))
+            );
+            
+            if (hasExpenseHeaders) {
+                const expenseRows = Array.from(table.rows).slice(1); // Skip header
+                
+                expenseRows.forEach(row => {
+                    const cells = Array.from(row.cells);
+                    if (cells.length >= 5) {
+                        const date = cells[0].textContent.trim();
+                        const property = cells[1].textContent.trim();
+                        const category = cells[2].textContent.trim();
+                        const description = cells[3].textContent.trim();
+                        const amount = cells[4].textContent.trim();
+                        
+                        // Skip if this doesn't look like a valid expense row
+                        if (!date || !property || !amount.includes('€')) return;
+                        
+                        if (!propertyData[property]) {
+                            propertyData[property] = {
+                                income: [],
+                                expenses: [],
+                                totalIncome: 0,
+                                totalExpenses: 0
+                            };
+                        }
+                        
+                        const expenseAmount = parseAmount(amount);
+                        
+                        if (expenseAmount > 0) {
+                            propertyData[property].expenses.push({
+                                type: 'Έξοδο',
+                                date: date,
+                                category: category,
+                                description: description,
+                                amount: expenseAmount,
+                                notes: ''
+                            });
+                            
+                            propertyData[property].totalExpenses += expenseAmount;
+                            grandTotalExpenses += expenseAmount;
+                        }
+                    }
+                });
+            }
+        });
+        
+        // If no properties found, add a note
+        if (Object.keys(propertyData).length === 0) {
+            csv.push('"Δεν βρέθηκαν δεδομένα","","","","",""');
+            csv.push('"Βεβαιωθείτε ότι υπάρχουν ακίνητα και έξοδα στη σελίδα","","","","",""');
+        } else {
+            // Output data grouped by property
+            Object.keys(propertyData).forEach(propertyName => {
+                const data = propertyData[propertyName];
+                
+                // Property header
+                csv.push(`"=== ${propertyName} ===","","","","",""`);
+                
+                // Income entries for this property
+                if (data.income.length > 0) {
+                    csv.push('"--- ΈΣΟΔΑ ---","","","","",""');
+                    data.income.forEach(item => {
+                        csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
+                    });
+                    csv.push(`"Σύνολο Εσόδων","","","","€${data.totalIncome.toFixed(2)}",""`);
+                    csv.push('"","","","","",""');
+                }
+                
+                // Expenses entries for this property
+                if (data.expenses.length > 0) {
+                    csv.push('"--- ΕΞΟΔΑ ---","","","","",""');
+                    data.expenses.forEach(item => {
+                        csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
+                    });
+                    csv.push(`"Σύνολο Εξόδων","","","","€${data.totalExpenses.toFixed(2)}",""`);
+                    csv.push('"","","","","",""');
+                }
+                
+                // Property net result
+                const netResult = data.totalIncome - data.totalExpenses;
+                csv.push(`"Καθαρό Αποτέλεσμα","","","","€${netResult.toFixed(2)}","${netResult >= 0 ? 'Κέρδος' : 'Ζημία'}"`);
+                csv.push('"","","","","",""'); // Empty line between properties
+            });
+            
+            // Grand totals
+            csv.push('"=== ΣΥΝΟΛΙΚΟΣ ΑΠΟΛΟΓΙΣΜΟΣ ===","","","","",""');
+            csv.push(`"Συνολικά Έσοδα","","","","€${grandTotalIncome.toFixed(2)}",""`);
+            csv.push(`"Συνολικά Έξοδα","","","","€${grandTotalExpenses.toFixed(2)}",""`);
+            const grandNetResult = grandTotalIncome - grandTotalExpenses;
+            csv.push(`"Καθαρό Συνολικό Αποτέλεσμα","","","","€${grandNetResult.toFixed(2)}","${grandNetResult >= 0 ? 'Συνολικό Κέρδος' : 'Συνολική Ζημία'}"`);
+        }
+        
+        // Create and download file
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'financial_report_' + new Date().toISOString().split('T')[0] + '.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    } catch (error) {
+        console.error('Financial report export error:', error);
+        alert('Σφάλμα κατά την εξαγωγή οικονομικού απολογισμού: ' + error.message);
+    }
+}
+</script>
+
 {% endblock content %}
