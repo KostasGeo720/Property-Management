@@ -115,7 +115,7 @@ class DocumentForm(forms.ModelForm):
     def clean_file(self):
         file = self.cleaned_data['file']
         if file.content_type != 'application/pdf':
-            raise forms.ValidationError("Only PDF files are allowed.")
+            raise forms.ValidationError("Επιτρέπονται μόνο αρχεία PDF.")
         return file
 
 class ExpenseForm(forms.ModelForm):

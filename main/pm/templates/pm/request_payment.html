@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>Submit Payment Request</h2>
-<p style="color: var(--muted); margin-bottom: 24px;">Select a lease to submit your payment proof for verification.</p>
+<p style="color: var(--muted); margin-bottom: 24px;">Επιλέξτε μια μίσθωση για να υποβάλετε το στοιχείο πληρωμής σας για επαλήθευση.</p>
 
 {% if leases %}
     <div style="display: grid; gap: 16px;">
@@ -15,12 +15,12 @@
                         {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}
                     </h3>
                     <div style="color: var(--muted); font-size: 14px;">
-                        <p style="margin: 4px 0;"><strong>Monthly Payment:</strong> €{{ lease.monthly_payment_amount }}</p>
+                        <p style="margin: 4px 0;"><strong>Μηνιαία Πληρωμή:</strong> €{{ lease.monthly_payment_amount }}</p>
                         <p style="margin: 4px 0;"><strong>Lease Period:</strong> {{ lease.start_date }} to {{ lease.end_date }}</p>
                         {% if lease.months_due > 0 %}
-                            <p style="margin: 4px 0; color: var(--danger);"><strong>Months Due:</strong> {{ lease.months_due }}</p>
+                            <p style="margin: 4px 0; color: var(--danger);"><strong>Μήνες σε Εκκρεμότητα:</strong> {{ lease.months_due }}</p>
                         {% else %}
-                            <p style="margin: 4px 0; color: var(--success);"><strong>Status:</strong> Up to date</p>
+                            <p style="margin: 4px 0; color: var(--success);"><strong>Κατάσταση:</strong> Ενημερωμένο</p>
                         {% endif %}
                     </div>
                 </div>
@@ -28,7 +28,7 @@
                     {% if lease.months_due > 0 %}
                         <span class="status available" style="background: var(--danger); margin-right: 12px;">PAYMENT DUE</span>
                     {% else %}
-                        <span class="status rented" style="background: var(--success); margin-right: 12px;">CURRENT</span>
+                        <span class="status rented" style="background: var(--success); margin-right: 12px;">ΕΝΕΡΓΟ</span>
                     {% endif %}
                     <a href="{% url 'submit_payment_request' lease.id %}" class="btn">Submit Payment Proof</a>
                 </div>
@@ -38,7 +38,7 @@
 {% else %}
     <div class="property-card" style="text-align: center; padding: 40px;">
         <h3 style="color: var(--muted);">No Active Leases</h3>
-        <p style="color: var(--muted);">You are not currently associated with any lease agreements.</p>
+        <p style="color: var(--muted);">Δεν συνδέεστε αυτήν τη στιγμή με καμία συμφωνία μίσθωσης.</p>
     </div>
 {% endif %}
 {% endblock %}

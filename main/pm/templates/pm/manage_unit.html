@@ -1,16 +1,16 @@
 {% extends "pm/create_property_complex.html" %}
 
-{% block title %}Manage Unit{% endblock %}
+{% block title %}Διαχείριση Μονάδας{% endblock %}
 
-{% block title2 %}Manage Unit: {{ unit.nickname }}{% endblock %}
+{% block title2 %}Διαχείριση Μονάδας: {{ unit.nickname }}{% endblock %}
 
-{% block btn %}Update Unit{% endblock btn %}
+{% block btn %}Ενημέρωση Μονάδας{% endblock btn %}
 
 {% block delete_unit %}
-    <a href="{% url 'delete_unit' unit.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this unit? This action cannot be undone.')">Delete Unit</a>
+    <a href="{% url 'delete_unit' unit.id %}" class="btn btn-outline" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή τη μονάδα; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.')">Διαγραφή Μονάδας</a>
     {% if lease %}
-        <a href="{% url 'edit_lease_unit' unit.id %}" class="btn btn-outline">View Lease</a>
+        <a href="{% url 'edit_lease_unit' unit.id %}" class="btn btn-outline">Προβολή Μίσθωσης</a>
     {% else %}
-        <a href="{% url 'create_lease_unit' unit.id %}" class="btn btn-outline">Create Lease</a>
+        <a href="{% url 'create_lease_unit' unit.id %}" class="btn btn-outline">Δημιουργία Μίσθωσης</a>
     {% endif %}
 {% endblock delete_unit %}

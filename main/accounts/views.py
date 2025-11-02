@@ -10,15 +10,15 @@ def login(request):
         if form.is_valid():
             user = form.get_user()
             auth_login(request, user)
-            messages.success(request, 'You have been logged in!')
+            messages.success(request, 'Έχετε συνδεθεί επιτυχώς!')
             return redirect('home')
         else:
-            messages.error(request, 'Your username or password is incorrect.')
+            messages.error(request, 'Το όνομα χρήστη ή ο κωδικός πρόσβασής σας είναι λανθασμένος.')
     else:
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
 
 def logout(request):
     auth_logout(request)
-    messages.success(request, 'You have been logged out!')
+    messages.success(request, 'Έχετε αποσυνδεθεί επιτυχώς!')
     return redirect('login')

@@ -137,7 +137,7 @@ class Lease(models.Model):
                         content=msg_content
                     )
                     send_mail(
-                        subject='Payment Due Notification',
+                        subject='Ειδοποίηση Εκκρεμούς Πληρωμής',
                         message=msg_content,
                         from_email=settings.EMAIL_HOST_USER,
                         recipient_list=[tenant.email],
@@ -168,11 +168,11 @@ class Lease(models.Model):
                 property=self.property,
                 unit=self.unit,
                 lease=self,
-                content=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.'
+                content=f'Πληρωμή €{self.monthly_payment_amount * pay_months} έγινε δεκτή. {md} μήνες εκκρεμούν ακόμη.'
             )
             send_mail(
-                subject=f'Payment Received Regarding Your Property {x.address}',
-                message=f'Payment of €{self.monthly_payment_amount * pay_months} received. {md} months still due.',
+                subject=f'Έγινε δεκτή πληρωμή για το ακίνητό σας {x.address}',
+                message=f'Πληρωμή €{self.monthly_payment_amount * pay_months} έγινε δεκτή. {md} μήνες εκκρεμούν ακόμη.',
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[x.owner.email],
                 fail_silently=False,
@@ -194,11 +194,11 @@ class Problem(models.Model):
             owner=self.tenant,
             property=self.property,
             unit=self.unit,
-            content=f'Problem described as: \n{self.description} \nhas been resolved.'
+            content=f'Το πρόβλημα που περιγράφεται ως: \n{self.description} \nέχει επιλυθεί.'
         )
         send_mail(
-            subject='Problem Resolved Notification',
-            message=f'Problem described as: \n{self.description} \nhas been resolved.',
+            subject='Ειδοποίηση Επίλυσης Προβλήματος',
+            message=f'Το πρόβλημα που περιγράφεται ως: \n{self.description} \nέχει επιλυθεί.',
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[self.tenant.email],
             fail_silently=True,
@@ -217,7 +217,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        return f'Message regarding {self.property} at {self.timestamp}'
+        return f'Μήνυμα σχετικά με {self.property} στις {self.timestamp}'
     
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
@@ -234,11 +234,11 @@ class Document(models.Model):
                 owner=tenant,
                 property=self.lease.property,
                 unit=self.lease.unit,
-                content=f'Document "{self.title}" has been verified.'
+                content=f'Το έγγραφο "{self.title}" έχει επαληθευτεί.'
             )
             send_mail(
-                subject='Document Verified Notification',
-                message=f'Document "{self.title}" has been verified.',
+                subject='Ειδοποίηση Επαλήθευσης Εγγράφου',
+                message=f'Το έγγραφο "{self.title}" έχει επαληθευτεί.',
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[tenant.email],
                 fail_silently=True,

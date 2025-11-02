@@ -17,7 +17,7 @@
                 Lease: {% if document.lease.property %}{{ document.lease.property.address }}{% else %}{{ document.lease.unit.nickname }} - {{ document.lease.unit.complex.address }}{% endif %}
             </small>
         </div>
-        <a href="{% url 'verify_payment' document.id %}" class="btn" style="margin-left: 16px; background: var(--success);">Verify Payment</a>
+        <a href="{% url 'verify_payment' document.id %}" class="btn" style="margin-left: 16px; background: var(--success);">Επαλήθευση Πληρωμής</a>
     </li>
     {% endfor %}
 </ul>

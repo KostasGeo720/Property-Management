@@ -259,10 +259,10 @@
                     const cells = Array.from(row.cells);
                     if (cells.length >= 5) {
                         const property = cells[0].textContent.trim();
-                        const monthlyRent = cells[1].textContent.trim();
-                        const collected = cells[2].textContent.trim();
-                        const status = cells[3].textContent.trim();
-                        const tenants = cells[4].textContent.trim();
+                        const propertyType = cells[1].textContent.trim();
+                        const monthlyRent = cells[2].textContent.trim();
+                        const collected = cells[3].textContent.trim();
+                        const status = cells[4].textContent.trim();
                         
                         if (!propertyData[property]) {
                             propertyData[property] = {
@@ -280,7 +280,7 @@
                             type: 'Εισόδημα',
                             date: 'Μηνιαίο',
                             category: 'Μίσθωμα',
-                            description: `Ενοικιαστές: ${tenants}`,
+                            description: `Τύπος: ${propertyType}`,
                             amount: collectedAmount,
                             notes: `Κατάσταση: ${status}`
                         });
@@ -399,7 +399,7 @@
                                         <td style="padding:6px;">
                                             €{{ lease.monthly_payment_amount|floatformat:2 }}
                                             {% if lease.months_due > 0 %}
-                                                <span style="color:var(--danger); font-size:13px;">({{ lease.months_due }} month{{ lease.months_due|pluralize }})</span>
+                                                <span style="color:var(--danger); font-size:13px;">({{ lease.months_due }} μήνα{{ lease.months_due|pluralize:"ς,ες" }})</span>
                                             {% endif %}
                                         </td>
                                         <td style="padding:6px;">
@@ -412,9 +412,9 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    <a href="{% url "documents" %}" style="display:inline-block; margin-top:12px; color:var(--primary); text-decoration:none;">View Submitted Payments</a>
+                    <a href="{% url "documents" %}" style="display:inline-block; margin-top:12px; color:var(--primary); text-decoration:none;">Προβολή Υποβληθεισών Πληρωμών</a>
                 {% else %}
-                    <p style="color:var(--muted);">No payments due.</p>
+                    <p style="color:var(--muted);">Δεν υπάρχουν πληρωμές προς είσπραξη.</p>
                 {% endif %}
             {% endwith %}
         </div>

@@ -253,7 +253,7 @@ def edit_lease_unit(request, unit_id):
         if form.is_valid():
             l = form.save(commit=False)
             if l.tenant.count() == 0:
-                messages.error(request, 'Lease must have at least one tenant!')
+                messages.error(request, 'Η μίσθωση πρέπει να έχει τουλάχιστον έναν ενοικιαστή!')
             else:
                 form.save()
                 messages.success(request, 'Η μίσθωση ενημερώθηκε επιτυχώς!')
@@ -301,7 +301,7 @@ def payment_status(request, lease_id):
         lease.pay()
         messages.success(request, 'Η πληρωμή σημειώθηκε ως εξοφλημένη επιτυχώς!')
     else:
-        messages.info(request, 'Payment is already marked as paid.')
+        messages.info(request, 'Η πληρωμή έχει ήδη σημειωθεί ως εξοφλημένη.')
     return redirect('manage_properties')
 
 @login_required
@@ -338,13 +338,13 @@ def create_expense(request):
         try:
             property_obj = Property.objects.get(id=object_id, owner=request.user)
         except Property.DoesNotExist:
-            messages.error(request, 'Property not found.')
+            messages.error(request, 'Το ακίνητο δεν βρέθηκε.')
             return redirect('expenses')
     elif property_type == 'unit' and object_id:
         try:
             unit_obj = Unit.objects.get(id=object_id, owner=request.user)
         except Unit.DoesNotExist:
-            messages.error(request, 'Unit not found.')
+            messages.error(request, 'Η μονάδα δεν βρέθηκε.')
             return redirect('expenses')
     
     if request.method == 'POST':
@@ -356,7 +356,7 @@ def create_expense(request):
             elif unit_obj:
                 expense.unit = unit_obj
             else:
-                messages.error(request, 'No valid property or unit specified.')
+                messages.error(request, 'Δεν έχει καθοριστεί έγκυρο ακίνητο ή μονάδα.')
                 return redirect('expenses')
             expense.save()
             messages.success(request, 'Το έξοδο καταγράφηκε επιτυχώς!')
@@ -462,7 +462,7 @@ def verify_payment(request, document_id):
     document.save()
     lease = document.lease
     lease.pay()
-    messages.success(request, 'Payment verified and marked as paid successfully!')
+    messages.success(request, 'Η πληρωμή επαληθεύτηκε και σημειώθηκε ως εξοφλημένη επιτυχώς!')
     return redirect('finances')
 
 @login_required

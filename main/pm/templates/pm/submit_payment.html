@@ -1,9 +1,9 @@
 {% extends "pm/home.html" %}
 
-{% block title %}Submit Payment{% endblock %}
+{% block title %}Υποβολή Πληρωμής{% endblock %}
 
 {% block content %}
-<h2>Submit Payment for the Lease regarding {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}</h2>
+<h2>Υποβολή Πληρωμής για τη Μίσθωση που αφορά το {% if lease.property %}{{ lease.property.address }}{% else %}{{ lease.unit.nickname }} - {{ lease.unit.complex.address }}{% endif %}</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.non_field_errors }}
@@ -22,7 +22,7 @@
     </div>
     {% endfor %}
     <div class="form-actions">
-        <button onclick="return confirmSubmission()" type="submit" class="btn btn-primary">Submit Document</button>
+        <button onclick="return confirmSubmission()" type="submit" class="btn btn-primary">Υποβολή Εγγράφου</button>
     </div>
 </form>
 {% endblock %}
@@ -30,7 +30,7 @@
 {% block js %}
 <script>
 function confirmSubmission() {
-  return confirm("Are you sure you want to submit the payment?");
+  return confirm("Είστε σίγουροι ότι θέλετε να υποβάλετε την πληρωμή;");
 }
 </script>
 {% endblock js %}
