@@ -66,7 +66,10 @@
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h2 style="margin: 0;">Επισκόπηση Ακινήτων</h2>
-                <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Εξαγωγή</button>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Εξαγωγή Ακινήτων</button>
+                    <button onclick="exportFinancialReport()" style="background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Οικονομικός Απολογισμός</button>
+                </div>
             </div>
             
             <div style="max-height: 260px; overflow-y: auto;">
@@ -225,6 +228,100 @@
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = 'properties_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            function exportFinancialReport() {
+                // Create comprehensive financial report with income and expenses
+                let csv = ['Οικονομικός Απολογισμός - ' + new Date().toLocaleDateString('el-GR'), '', ''];
+                csv.push('');
+                
+                // Income Section
+                csv.push('ΕΙΣΟΔΗΜΑΤΑ');
+                csv.push('Ακίνητο,Μηνιαίο Μίσθωμα,Συνολικά Εισπραχθέντα,Κατάσταση Πληρωμής,Ενοικιαστές');
+                
+                // Get income data from property spreadsheet
+                const propertyTable = document.getElementById('propertySpreadsheet');
+                const propertyRows = Array.from(propertyTable.rows).slice(1); // Skip header
+                
+                let totalMonthlyIncome = 0;
+                let totalCollectedIncome = 0;
+                
+                propertyRows.forEach(row => {
+                    const cells = Array.from(row.cells);
+                    if (cells.length >= 5) {
+                        const property = cells[0].textContent.trim();
+                        const monthlyRent = cells[1].textContent.trim();
+                        const collected = cells[2].textContent.trim();
+                        const status = cells[3].textContent.trim();
+                        const tenants = cells[4].textContent.trim();
+                        
+                        csv.push(`"${property}","${monthlyRent}","${collected}","${status}","${tenants}"`);
+                        
+                        // Extract numeric values for totals
+                        const monthlyAmount = parseFloat(monthlyRent.replace(/[€,]/g, '')) || 0;
+                        const collectedAmount = parseFloat(collected.replace(/[€,]/g, '')) || 0;
+                        totalMonthlyIncome += monthlyAmount;
+                        totalCollectedIncome += collectedAmount;
+                    }
+                });
+                
+                // Income totals
+                csv.push('');
+                csv.push(`"Σύνολο Μηνιαίου Εισοδήματος","€${totalMonthlyIncome.toFixed(2)}","","",""`);
+                csv.push(`"Σύνολο Εισπραχθέντων","€${totalCollectedIncome.toFixed(2)}","","",""`);
+                
+                csv.push('');
+                csv.push('');
+                
+                // Expenses Section
+                csv.push('ΕΞΟΔΑ (Πρόσφατα)');
+                csv.push('Ημερομηνία,Ακίνητο,Κατηγορία,Περιγραφή,Ποσό');
+                
+                // Get expenses data
+                {% if recent_expenses %}
+                    let totalExpenses = 0;
+                    {% for expense in recent_expenses %}
+                        const expenseData = [
+                            "{{ expense.date|date:'d/m/Y' }}",
+                            "{% if expense.property %}{{ expense.property.address|escapejs }}{% else %}{{ expense.unit.nickname|escapejs }} - {{ expense.unit.complex.address|escapejs }}{% endif %}",
+                            "{{ expense.category|escapejs }}",
+                            "{{ expense.description|escapejs }}",
+                            "€{{ expense.amount }}"
+                        ];
+                        csv.push('"' + expenseData.join('","') + '"');
+                        totalExpenses += {{ expense.amount }};
+                    {% endfor %}
+                    
+                    // Expenses total
+                    csv.push('');
+                    csv.push(`"Σύνολο Πρόσφατων Εξόδων","","","","€${totalExpenses.toFixed(2)}"`);
+                {% else %}
+                    csv.push('"Δεν υπάρχουν καταγεγραμμένα έξοδα","","","",""');
+                {% endif %}
+                
+                csv.push('');
+                csv.push('');
+                
+                // Summary
+                csv.push('ΣΥΝΟΨΗ');
+                csv.push('Περιγραφή,Ποσό');
+                csv.push(`"Συνολικά Εισπραχθέντα","€${totalCollectedIncome.toFixed(2)}"`);
+                {% if recent_expenses %}
+                    csv.push(`"Συνολικά Έξοδα","€${totalExpenses.toFixed(2)}"`);
+                    csv.push(`"Καθαρό Αποτέλεσμα","€${(totalCollectedIncome - totalExpenses).toFixed(2)}"`);
+                {% else %}
+                    csv.push('"Συνολικά Έξοδα","€0.00"');
+                    csv.push(`"Καθαρό Αποτέλεσμα","€${totalCollectedIncome.toFixed(2)}"`);
+                {% endif %}
+                
+                // Create and download file
+                const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'financial_report_' + new Date().toISOString().split('T')[0] + '.csv';
                 a.click();
                 URL.revokeObjectURL(url);
             }

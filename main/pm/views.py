@@ -448,7 +448,7 @@ def submit_payment_request(request, lease_id):
             document.status = 'unverified'
             document.save()
             messages.success(request, 'Payment request submitted successfully!')
-            return redirect('finances')
+            return redirect('home')
         else:
             messages.error(request, 'Error! Please ensure the uploaded file is a valid PDF.')
     else:
