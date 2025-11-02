@@ -5,23 +5,23 @@ from django.core.mail import send_mail
 from django.contrib.auth.models import User
 from django.conf import settings
 REGULAR_CHOICES = [
-    ('condo', 'Condo'),
-    ('apartment', 'Apartment'),
-    ('studio', 'Studio'),
-    ('house', 'House'),
-    ('townhouse', 'Townhouse'),
-    ('bungalow', 'Bungalow'),
-    ('co-op', 'Co-op'),
-    ('loft', 'Loft'),
-    ('barn', 'Barn'),
-    ('shack', 'Shack'),
-    ('cottage', 'Cottage'),
-    ('parking' ,'Parking')
+    ('condo', 'Διαμέρισμα'),
+    ('apartment', 'Διαμέρισμα'),
+    ('studio', 'Στούντιο'),
+    ('house', 'Σπίτι'),
+    ('townhouse', 'Μεζονέτα'),
+    ('bungalow', 'Μπανγκαλόου'),
+    ('co-op', 'Συνεταιριστικό'),
+    ('loft', 'Λοφτ'),
+    ('barn', 'Αποθήκη'),
+    ('shack', 'Παράπηγμα'),
+    ('cottage', 'Εξοχικό'),
+    ('parking' ,'Χώρος Στάθμευσης')
 ]
 COMPLEX_CHOICES = [
-    ('apartment', 'Apartment'),
-    ('studio', 'Studio'),
-    ('co-op', 'Co-op'),
+    ('apartment', 'Διαμέρισμα'),
+    ('studio', 'Στούντιο'),
+    ('co-op', 'Συνεταιριστικό'),
 ]
 # Create your models here.
 
@@ -35,7 +35,7 @@ class BaseProperty(models.Model):
     amenities = models.CharField(max_length=200)
     description = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=9, choices=[('available', 'Available'), ('rented', 'Rented')], default='available')
+    status = models.CharField(max_length=9, choices=[('available', 'Διαθέσιμο'), ('rented', 'Ενοικιασμένο')], default='available')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -77,7 +77,7 @@ class Lease(models.Model):
     end_date = models.DateField()
     amount_paid = models.DecimalField(max_digits=10, default=0, decimal_places=2)
     monthly_payment_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    monthly_payment_status = models.CharField(max_length=10, default='Pending', choices=[('pending', 'Pending'), ('paid', 'Paid')])
+    monthly_payment_status = models.CharField(max_length=10, default='Pending', choices=[('pending', 'Εκκρεμεί'), ('paid', 'Πληρώθηκε')])
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def get_remaining_months(self):
@@ -105,7 +105,7 @@ class Lease(models.Model):
         due = self.months_due()
         if due > 0:
             x = self.property if self.property else self.unit
-            msg_content = f'Lease for {x.address} has {due} months due (€{due*self.monthly_payment_amount} remaining).'
+            msg_content = f'Η μίσθωση για το {x.address} έχει {due} μήνες σε εκκρεμότητα (€{due*self.monthly_payment_amount} υπολείπονται).'
             identical = Message.objects.filter(
                 owner=x.owner,
                 lease=self,
@@ -122,7 +122,7 @@ class Lease(models.Model):
                     content=msg_content
                 )
                 send_mail(
-                    subject='Payment Due Notification',
+                    subject='Ειδοποίηση Εκκρεμούς Πληρωμής',
                     message=msg_content,
                     from_email=settings.EMAIL_HOST_USER,
                     recipient_list=[x.owner.email],
@@ -225,7 +225,7 @@ class Document(models.Model):
     lease = models.ForeignKey(Lease, on_delete=models.CASCADE, related_name='documents', null=True, blank=True)
     file = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=[('verified', 'Verified'), ('unverified', 'Unverified')], default='verified')
+    status = models.CharField(max_length=10, choices=[('verified', 'Επιβεβαιωμένο'), ('unverified', 'Μη Επιβεβαιωμένο')], default='verified')
     
     def verify(self):
         self.status = 'verified'
@@ -249,15 +249,15 @@ class Document(models.Model):
 
 class Expense(models.Model):
     EXPENSE_CATEGORIES = [
-        ('maintenance', 'Maintenance'),
-        ('utilities', 'Utilities'),
-        ('insurance', 'Insurance'),
-        ('taxes', 'Property Taxes'),
-        ('repairs', 'Repairs'),
-        ('management', 'Property Management'),
-        ('legal', 'Legal Fees'),
-        ('advertising', 'Advertising'),
-        ('other', 'Other'),
+        ('maintenance', 'Συντήρηση'),
+        ('utilities', 'Κοινόχρηστα'),
+        ('insurance', 'Ασφάλεια'),
+        ('taxes', 'Φόροι Ακινήτου'),
+        ('repairs', 'Επισκευές'),
+        ('management', 'Διαχείριση Ακινήτου'),
+        ('legal', 'Νομικά Έξοδα'),
+        ('advertising', 'Διαφήμιση'),
+        ('other', 'Άλλα'),
     ]
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)

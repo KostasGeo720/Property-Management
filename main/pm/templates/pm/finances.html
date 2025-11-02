@@ -79,7 +79,7 @@
                             <th style="text-align: left; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Ακίνητο</th>
                             <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Τύπος</th>
                             <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Μηνιαίο</th>
-                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Πληρωμένο</th>
+                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Εισπραχθέντα</th>
                             <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Κατάσταση</th>
                         </tr>
                     </thead>
@@ -223,7 +223,9 @@
                     ).join(',')
                 ).join('\n');
                 
-                const blob = new Blob([csv], { type: 'text/csv' });
+                // Add BOM for Excel compatibility with Greek characters
+                const BOM = '\uFEFF';
+                const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -233,21 +235,26 @@
             }
             
             function exportFinancialReport() {
-                // Create comprehensive financial report with income and expenses
-                let csv = ['Οικονομικός Απολογισμός - ' + new Date().toLocaleDateString('el-GR'), '', ''];
-                csv.push('');
+                // Create comprehensive financial report grouped by property
+                let csv = [];
                 
-                // Income Section
-                csv.push('ΕΙΣΟΔΗΜΑΤΑ');
-                csv.push('Ακίνητο,Μηνιαίο Μίσθωμα,Συνολικά Εισπραχθέντα,Κατάσταση Πληρωμής,Ενοικιαστές');
+                // Header section
+                csv.push('"Οικονομικός Απολογισμός","' + new Date().toLocaleDateString('el-GR') + '","","","",""');
+                csv.push('"","","","","",""');
+                csv.push('"Τύπος","Ημερομηνία","Κατηγορία","Περιγραφή","Ποσό","Σημειώσεις"');
+                csv.push('"","","","","",""');
                 
                 // Get income data from property spreadsheet
                 const propertyTable = document.getElementById('propertySpreadsheet');
                 const propertyRows = Array.from(propertyTable.rows).slice(1); // Skip header
                 
-                let totalMonthlyIncome = 0;
-                let totalCollectedIncome = 0;
+                let grandTotalIncome = 0;
+                let grandTotalExpenses = 0;
                 
+                // Group data by property
+                const propertyData = {};
+                
+                // First, collect income data for each property
                 propertyRows.forEach(row => {
                     const cells = Array.from(row.cells);
                     if (cells.length >= 5) {
@@ -257,71 +264,107 @@
                         const status = cells[3].textContent.trim();
                         const tenants = cells[4].textContent.trim();
                         
-                        csv.push(`"${property}","${monthlyRent}","${collected}","${status}","${tenants}"`);
+                        if (!propertyData[property]) {
+                            propertyData[property] = {
+                                income: [],
+                                expenses: [],
+                                totalIncome: 0,
+                                totalExpenses: 0
+                            };
+                        }
                         
-                        // Extract numeric values for totals
-                        const monthlyAmount = parseFloat(monthlyRent.replace(/[€,]/g, '')) || 0;
                         const collectedAmount = parseFloat(collected.replace(/[€,]/g, '')) || 0;
-                        totalMonthlyIncome += monthlyAmount;
-                        totalCollectedIncome += collectedAmount;
+                        const monthlyAmount = parseFloat(monthlyRent.replace(/[€,]/g, '')) || 0;
+                        
+                        propertyData[property].income.push({
+                            type: 'Εισόδημα',
+                            date: 'Μηνιαίο',
+                            category: 'Μίσθωμα',
+                            description: `Ενοικιαστές: ${tenants}`,
+                            amount: collectedAmount,
+                            notes: `Κατάσταση: ${status}`
+                        });
+                        
+                        propertyData[property].totalIncome += collectedAmount;
+                        grandTotalIncome += collectedAmount;
                     }
                 });
                 
-                // Income totals
-                csv.push('');
-                csv.push(`"Σύνολο Μηνιαίου Εισοδήματος","€${totalMonthlyIncome.toFixed(2)}","","",""`);
-                csv.push(`"Σύνολο Εισπραχθέντων","€${totalCollectedIncome.toFixed(2)}","","",""`);
-                
-                csv.push('');
-                csv.push('');
-                
-                // Expenses Section
-                csv.push('ΕΞΟΔΑ (Πρόσφατα)');
-                csv.push('Ημερομηνία,Ακίνητο,Κατηγορία,Περιγραφή,Ποσό');
-                
-                // Get expenses data
+                // Add expenses data to properties
                 {% if recent_expenses %}
-                    let totalExpenses = 0;
                     {% for expense in recent_expenses %}
-                        const expenseData = [
-                            "{{ expense.date|date:'d/m/Y' }}",
-                            "{% if expense.property %}{{ expense.property.address|escapejs }}{% else %}{{ expense.unit.nickname|escapejs }} - {{ expense.unit.complex.address|escapejs }}{% endif %}",
-                            "{{ expense.category|escapejs }}",
-                            "{{ expense.description|escapejs }}",
-                            "€{{ expense.amount }}"
-                        ];
-                        csv.push('"' + expenseData.join('","') + '"');
-                        totalExpenses += {{ expense.amount }};
+                        const propertyName = "{% if expense.property %}{{ expense.property.address|escapejs }}{% else %}{{ expense.unit.nickname|escapejs }} - {{ expense.unit.complex.address|escapejs }}{% endif %}";
+                        
+                        if (!propertyData[propertyName]) {
+                            propertyData[propertyName] = {
+                                income: [],
+                                expenses: [],
+                                totalIncome: 0,
+                                totalExpenses: 0
+                            };
+                        }
+                        
+                        const expenseAmount = {{ expense.amount }};
+                        propertyData[propertyName].expenses.push({
+                            type: 'Έξοδο',
+                            date: '{{ expense.date|date:"d/m/Y" }}',
+                            category: '{{ expense.category|escapejs }}',
+                            description: '{{ expense.description|escapejs }}',
+                            amount: expenseAmount,
+                            notes: '{% if expense.notes %}{{ expense.notes|escapejs }}{% endif %}'
+                        });
+                        
+                        propertyData[propertyName].totalExpenses += expenseAmount;
+                        grandTotalExpenses += expenseAmount;
                     {% endfor %}
+                {% endif %}
+                
+                // Output data grouped by property
+                Object.keys(propertyData).forEach(propertyName => {
+                    const data = propertyData[propertyName];
                     
-                    // Expenses total
-                    csv.push('');
-                    csv.push(`"Σύνολο Πρόσφατων Εξόδων","","","","€${totalExpenses.toFixed(2)}"`);
-                {% else %}
-                    csv.push('"Δεν υπάρχουν καταγεγραμμένα έξοδα","","","",""');
-                {% endif %}
+                    // Property header
+                    csv.push(`"=== ${propertyName} ===","","","","",""`);
+                    
+                    // Income entries for this property
+                    if (data.income.length > 0) {
+                        csv.push('"--- ΕΙΣΟΔΗΜΑΤΑ ---","","","","",""');
+                        data.income.forEach(item => {
+                            csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
+                        });
+                        csv.push(`"Σύνολο Εισοδήματος","","","","€${data.totalIncome.toFixed(2)}",""`);
+                    }
+                    
+                    // Expenses entries for this property
+                    if (data.expenses.length > 0) {
+                        csv.push('"--- ΕΞΟΔΑ ---","","","","",""');
+                        data.expenses.forEach(item => {
+                            csv.push(`"${item.type}","${item.date}","${item.category}","${item.description}","€${item.amount.toFixed(2)}","${item.notes}"`);
+                        });
+                        csv.push(`"Σύνολο Εξόδων","","","","€${data.totalExpenses.toFixed(2)}",""`);
+                    }
+                    
+                    // Property net result
+                    const netResult = data.totalIncome - data.totalExpenses;
+                    csv.push(`"Καθαρό Αποτέλεσμα","","","","€${netResult.toFixed(2)}","${netResult >= 0 ? 'Κέρδος' : 'Ζημία'}"`);
+                    csv.push('"","","","","",""'); // Empty line between properties
+                });
                 
-                csv.push('');
-                csv.push('');
-                
-                // Summary
-                csv.push('ΣΥΝΟΨΗ');
-                csv.push('Περιγραφή,Ποσό');
-                csv.push(`"Συνολικά Εισπραχθέντα","€${totalCollectedIncome.toFixed(2)}"`);
-                {% if recent_expenses %}
-                    csv.push(`"Συνολικά Έξοδα","€${totalExpenses.toFixed(2)}"`);
-                    csv.push(`"Καθαρό Αποτέλεσμα","€${(totalCollectedIncome - totalExpenses).toFixed(2)}"`);
-                {% else %}
-                    csv.push('"Συνολικά Έξοδα","€0.00"');
-                    csv.push(`"Καθαρό Αποτέλεσμα","€${totalCollectedIncome.toFixed(2)}"`);
-                {% endif %}
+                // Grand totals
+                csv.push('"","","","","",""');
+                csv.push('"=== ΣΥΝΟΛΙΚΟΣ ΑΠΟΛΟΓΙΣΜΟΣ ===","","","","",""');
+                csv.push(`"Συνολικά Εισοδήματα","","","","€${grandTotalIncome.toFixed(2)}",""`);
+                csv.push(`"Συνολικά Έξοδα","","","","€${grandTotalExpenses.toFixed(2)}",""`);
+                const grandNetResult = grandTotalIncome - grandTotalExpenses;
+                csv.push(`"Καθαρό Συνολικό Αποτέλεσμα","","","","€${grandNetResult.toFixed(2)}","${grandNetResult >= 0 ? 'Συνολικό Κέρδος' : 'Συνολική Ζημία'}"`);
                 
                 // Create and download file
-                const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
+                const BOM = '\uFEFF'; // Add BOM for Excel compatibility with Greek characters
+                const blob = new Blob([BOM + csv.join('\n')], { type: 'text/csv;charset=utf-8;' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'financial_report_' + new Date().toISOString().split('T')[0] + '.csv';
+                a.download = 'financial_report_by_property_' + new Date().toISOString().split('T')[0] + '.csv';
                 a.click();
                 URL.revokeObjectURL(url);
             }
@@ -329,16 +372,16 @@
 
         <!-- Bottom Right: Payments Due -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
-            <h2 style="margin-top:0;">Payments Due</h2>
+            <h2 style="margin-top:0;">Πληρωμές προς Είσπραξη</h2>
             {% with due_leases=leases|dictsort:"monthly_payment_status" %}
                 {% if leases %}
                     <table style="width:100%; border-collapse:collapse;">
                         <thead>
                             <tr style="color:var(--muted); font-size:14px;">
-                                <th style="text-align:left; padding:6px;">Property</th>
-                                <th style="text-align:left; padding:6px;">Tenant(s)</th>
-                                <th style="text-align:left; padding:6px;">Amount Due</th>
-                                <th style="text-align:left; padding:6px;">Status</th>
+                                <th style="text-align:left; padding:6px;">Ακίνητο</th>
+                                <th style="text-align:left; padding:6px;">Ενοικιαστές</th>
+                                <th style="text-align:left; padding:6px;">Οφειλόμενο Ποσό</th>
+                                <th style="text-align:left; padding:6px;">Κατάσταση</th>
                             </tr>
                         </thead>
                         <tbody>

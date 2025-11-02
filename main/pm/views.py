@@ -38,7 +38,7 @@ def create_property_complex(request):
             property_complex = form.save(commit=False)
             property_complex.owner = request.user
             property_complex.save()
-            messages.success(request, 'Property Complex created successfully!')
+            messages.success(request, 'Το συγκρότημα ακινήτων δημιουργήθηκε επιτυχώς!')
             return redirect('manage_properties')
     else:
         form = NewPropertyComplexForm()
@@ -55,10 +55,10 @@ def create_unit(request, address):
             unit.owner = request.user
             unit.complex = complex_obj
             unit.save()
-            messages.success(request, 'Unit added successfully!')
+            messages.success(request, 'Η μονάδα προστέθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error! Invalid data provided.')
+            messages.error(request, 'Σφάλμα! Παρέχονται μη έγκυρα δεδομένα.')
     else:
         form = NewUnitForm()
 
@@ -72,10 +72,10 @@ def create_property(request):
             property = form.save(commit=False)
             property.owner = request.user
             property.save()
-            messages.success(request, 'Property added successfully!')
+            messages.success(request, 'Το ακίνητο προστέθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error! Invalid data provided.')
+            messages.error(request, 'Σφάλμα! Παρέχονται μη έγκυρα δεδομένα.')
     else:
         form = NewPropertyForm()
     return render(request, 'pm/create_property.html', {'form': form})
@@ -101,10 +101,10 @@ def create_lease(request, property_id):
             form.save_m2m()
             property.status = 'rented'
             property.save()
-            messages.success(request, 'Lease created successfully!')
+            messages.success(request, 'Η μίσθωση δημιουργήθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewLeaseForm(landlord_user=request.user)
     return render(request, 'pm/create_lease.html', {'form': form})
@@ -121,10 +121,10 @@ def create_lease_unit(request, unit_id):
             form.save_m2m()
             unit.status = 'rented'
             unit.save()
-            messages.success(request, 'Lease created successfully!')
+            messages.success(request, 'Η μίσθωση δημιουργήθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewLeaseForm(landlord_user=request.user)
     return render(request, 'pm/create_lease.html', {'form': form, 'unit': unit})
@@ -139,10 +139,10 @@ def report_problem(request):
             problem = form.save(commit=False)
             problem.tenant = request.user
             problem.save()
-            messages.success(request, 'Problem reported successfully!')
+            messages.success(request, 'Το πρόβλημα αναφέρθηκε επιτυχώς!')
             return redirect('home')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewProblemForm(tenant=request.user)
     return render(request, 'pm/report_problem.html', {'form': form, 'properties': properties, 'units': units})
@@ -151,7 +151,7 @@ def report_problem(request):
 def solve_problem(request, problem_id):
     problem = Problem.objects.get(id=problem_id)
     problem.delete()
-    messages.success(request, 'Problem marked as solved successfully!') #Femboy Spelling Correction
+    messages.success(request, 'Το πρόβλημα σημειώθηκε ως επιλυμένο επιτυχώς!') #Femboy Spelling Correction
     return redirect('home')
 
 @login_required
@@ -169,7 +169,7 @@ def remove_tennant(request, lease_id, tennant_id):
     lease = Lease.objects.get(id=lease_id)
     tennant = User.objects.get(id=tennant_id)
     lease.tennant.remove(tennant)
-    messages.success(request, 'Tennant removed successfully!')
+    messages.success(request, 'Ο ενοικιαστής αφαιρέθηκε επιτυχώς!')
     if lease.tennant.count() == 0:
         lease.property.status = 'available'
         lease.delete()
@@ -185,10 +185,10 @@ def add_tennant(request, property_id):
         if form.is_valid():
             selected_tenants = form.cleaned_data['tennant']
             tenant_ids = [tenant.id for tenant in selected_tenants]
-            messages.success(request, 'Tennant added successfully!')
+            messages.success(request, 'Ο ενοικιαστής προστέθηκε επιτυχώς!')
             return redirect(f'/create_lease/{property_id}/?tenants={",".join(map(str, tenant_ids))}')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = AddTenantForm(instance=lease)
     return render(request, 'pm/add_tennant.html', {'form':form})
@@ -200,10 +200,10 @@ def edit_property(request, property_id):
         form = NewPropertyForm(request.POST, instance=property)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Property updated successfully!')
+            messages.success(request, 'Το ακίνητο ενημερώθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewPropertyForm(instance=property)
     return render(request, 'pm/edit_property.html', {'form': form})
@@ -216,10 +216,10 @@ def manage_unit(request, unit_id):
         form = NewUnitForm(request.POST, instance=unit)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Unit updated successfully!')
+            messages.success(request, 'Η μονάδα ενημερώθηκε επιτυχώς!')
             return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewUnitForm(instance=unit)
     return render(request, 'pm/manage_unit.html', {'form': form, 'unit': unit, 'lease': lease})
@@ -233,13 +233,13 @@ def edit_lease(request, property_id):
         if form.is_valid():
             l = form.save(commit=False)
             if l.tenant.count() == 0:
-                messages.error(request, 'Lease must have at least one tenant!')
+                messages.error(request, 'Η μίσθωση πρέπει να έχει τουλάχιστον έναν ενοικιαστή!')
             else:
                 form.save()
-                messages.success(request, 'Lease updated successfully!')
+                messages.success(request, 'Η μίσθωση ενημερώθηκε επιτυχώς!')
                 return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewLeaseForm(instance=lease, landlord_user=request.user)
     return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
@@ -256,10 +256,10 @@ def edit_lease_unit(request, unit_id):
                 messages.error(request, 'Lease must have at least one tenant!')
             else:
                 form.save()
-                messages.success(request, 'Lease updated successfully!')
+                messages.success(request, 'Η μίσθωση ενημερώθηκε επιτυχώς!')
                 return redirect('manage_properties')
         else:
-            messages.error(request, 'Error!')
+            messages.error(request, 'Σφάλμα!')
     else:
         form = NewLeaseForm(instance=lease, landlord_user=request.user)
     return render(request, 'pm/edit_lease.html', {'form': form, 'lease': lease})
@@ -268,21 +268,21 @@ def edit_lease_unit(request, unit_id):
 def delete_property(request, property_id):
     property = Property.objects.get(id=property_id)
     property.delete()
-    messages.success(request, 'Property deleted successfully!')
+    messages.success(request, 'Το ακίνητο διαγράφηκε επιτυχώς!')
     return redirect('manage_properties')
 
 @login_required
 def delete_complex(request, complex_id):
     complex = PropertyComplex.objects.get(id=complex_id)
     complex.delete()
-    messages.success(request, 'Property Complex deleted successfully!')
+    messages.success(request, 'Το συγκρότημα ακινήτων διαγράφηκε επιτυχώς!')
     return redirect('manage_properties')
 
 @login_required
 def delete_unit(request, unit_id):
     unit = Unit.objects.get(id=unit_id)
     unit.delete()
-    messages.success(request, 'Unit deleted successfully!')
+    messages.success(request, 'Η μονάδα διαγράφηκε επιτυχώς!')
     return redirect('manage_properties')
 
 @login_required
@@ -291,7 +291,7 @@ def delete_lease(request, lease_id):
     lease.property.status = 'available'
     lease.property.save()
     lease.delete()
-    messages.success(request, 'Lease deleted successfully!')
+    messages.success(request, 'Η μίσθωση διαγράφηκε επιτυχώς!')
     return redirect('manage_properties')
 
 @login_required
@@ -299,7 +299,7 @@ def payment_status(request, lease_id):
     lease = Lease.objects.get(id=lease_id)
     if lease.monthly_payment_status.lower() == 'pending':
         lease.pay()
-        messages.success(request, 'Payment marked as paid successfully!')
+        messages.success(request, 'Η πληρωμή σημειώθηκε ως εξοφλημένη επιτυχώς!')
     else:
         messages.info(request, 'Payment is already marked as paid.')
     return redirect('manage_properties')
@@ -359,10 +359,10 @@ def create_expense(request):
                 messages.error(request, 'No valid property or unit specified.')
                 return redirect('expenses')
             expense.save()
-            messages.success(request, 'Expense recorded successfully!')
+            messages.success(request, 'Το έξοδο καταγράφηκε επιτυχώς!')
             return redirect('expenses')
         else:
-            messages.error(request, 'Error! Please check the form data.')
+            messages.error(request, 'Σφάλμα! Παρακαλώ ελέγξτε τα δεδομένα της φόρμας.')
     else:
         form = ExpenseForm()
     
@@ -420,10 +420,10 @@ def submit_payment(request, lease_id):
             document.lease = lease
             document.save()
             lease.pay()
-            messages.success(request, 'Payment submitted and marked as paid successfully!')
+            messages.success(request, 'Η πληρωμή υποβλήθηκε και σημειώθηκε ως εξοφλημένη επιτυχώς!')
             return redirect('finances')
         else:
-            messages.error(request, 'Error! Please ensure the uploaded file is a valid PDF.')
+            messages.error(request, 'Σφάλμα! Παρακαλώ βεβαιωθείτε ότι το αρχείο που ανεβάσατε είναι έγκυρο PDF.')
     else:
         form = DocumentForm()
     return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
@@ -447,10 +447,10 @@ def submit_payment_request(request, lease_id):
             document.lease = lease
             document.status = 'unverified'
             document.save()
-            messages.success(request, 'Payment request submitted successfully!')
+            messages.success(request, 'Το αίτημα πληρωμής υποβλήθηκε επιτυχώς!')
             return redirect('home')
         else:
-            messages.error(request, 'Error! Please ensure the uploaded file is a valid PDF.')
+            messages.error(request, 'Σφάλμα! Παρακαλώ βεβαιωθείτε ότι το αρχείο που ανεβάσατε είναι έγκυρο PDF.')
     else:
         form = DocumentForm()
     return render(request, 'pm/submit_payment.html', {'form':form, 'lease': lease})
