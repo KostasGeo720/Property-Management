@@ -1,24 +1,24 @@
 {% extends 'pm/base.html' %}
 
-{% block title %}Home{% endblock %}
+{% block title %}Αρχική{% endblock %}
 
 {% block staff_nav %}
   {% if user.is_staff %}
-    <li class="nav-item"><a class="btn" href="{% url 'home' %}">Dashboard</a></li>
-    <li class="nav-item"><a class="btn" href="{% url 'manage_properties' %}">Manage Properties</a></li>
-    <li class="nav-item"><a class="btn" href="{% url 'finances' %}">Finance</a></li>
+    <li class="nav-item"><a class="btn" href="{% url 'home' %}">Πίνακας Ελέγχου</a></li>
+    <li class="nav-item"><a class="btn" href="{% url 'manage_properties' %}">Διαχείριση Ακινήτων</a></li>
+    <li class="nav-item"><a class="btn" href="{% url 'finances' %}">Οικονομικά</a></li>
   {% else %}
     {% if properties or units %}
-    <li class="nav-item"><a class="btn" href="{% url 'report_problem' %}">Report Problem</a></li>
-    <li class="nav-item"><a class="btn" href="{% url 'request_payment' %}">Request Payment</a></li>
+    <li class="nav-item"><a class="btn" href="{% url 'report_problem' %}">Αναφορά Προβλήματος</a></li>
+    <li class="nav-item"><a class="btn" href="{% url 'request_payment' %}">Αίτημα Πληρωμής</a></li>
     {% endif %}
     {% endif %}
 {% endblock %}
 
 {% block content %}
-  <h2>Welcome to Property Management</h2>
+  <h2>Καλώς ήρθατε στη Διαχείριση Ακινήτων</h2>
 
-  <h1>Notifications</h1>
+  <h1>Ειδοποιήσεις</h1>
     <hr style="border-color: var(--primary); margin-bottom: 1rem;">
     {% for notification in notifications %}
       <div class="notification-card">
@@ -32,31 +32,31 @@
         </div>
       </div>
       {% empty %}
-      <p>No Notifications!</p>
+      <p>Δεν υπάρχουν ειδοποιήσεις!</p>
     {% endfor %}
     
   <hr style="border-color: var(--primary); margin-bottom: 1rem;">
   {% if user.is_staff %}
-  <h1>Reported Problems</h1>
+  <h1>Αναφερθέντα Προβλήματα</h1>
   {% for problem in problems %}
     <div class="problem-card">
         <div class="problem-header">
-        <h3 class="problem-title">Reported by: {{ problem.tenant }}</h3>
+        <h3 class="problem-title">Αναφέρθηκε από: {{ problem.tenant }}</h3>
         </div>
         <div class="problem-body">
         {% if problem.property %}
-        <h2>Address: {{ problem.property }}</h2>
+        <h2>Διεύθυνση: {{ problem.property }}</h2>
         {% else %}
-        <h2>Unit: {{ problem.unit }}</h2>
+        <h2>Μονάδα: {{ problem.unit }}</h2>
         {% endif %}
         <p class="problem-description">{{ problem.description }}</p>
         </div>
         <div class="form-actions">
-            <a class="btn btn-outline" href="{% url "solve_problem" problem.id %}">Mark as Solved</a>
+            <a class="btn btn-outline" href="{% url "solve_problem" problem.id %}">Σήμανση ως Επιλυμένο</a>
         </div>
     </div>
     {% empty %}
-    <p>No Problems!</p>
+    <p>Δεν υπάρχουν προβλήματα!</p>
   {% endfor %}
   <hr style="border-color: var(--primary); margin-bottom: 1rem;">
   {% endif %}

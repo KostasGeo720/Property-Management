@@ -4,14 +4,14 @@
 <div class="container" style="margin-top:32px;">
     <div style="max-width: 600px; margin: 0 auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <h1 style="margin: 0; color: var(--text);">Add Expense</h1>
-            <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Back to Expenses</a>
+            <h1 style="margin: 0; color: var(--text);"> Προσθήκη Εξόδου</h1>
+            <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Επιστροφή στα Έξοδα</a>
         </div>
 
         <!-- Property/Unit Info Card -->
         {% if property_obj or unit_obj %}
             <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); margin-bottom: 24px; border: 1px solid rgba(255,255,255,.08);">
-                <h3 style="margin: 0 0 12px 0; color: var(--primary); font-size: 16px;">Adding expense for:</h3>
+                <h3 style="margin: 0 0 12px 0; color: var(--primary); font-size: 16px;">Προσθήκη εξόδου για:</h3>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="background: var(--panel-1); padding: 4px 8px; border-radius: 8px; font-size: 12px;">
                         {% if property_obj %}
@@ -37,7 +37,7 @@
                 {% csrf_token %}
                 
                 <div class="form-row">
-                    <label for="{{ form.category.id_for_label }}">Category</label>
+                    <label for="{{ form.category.id_for_label }}">Κατηγορία</label>
                     {{ form.category }}
                     {% if form.category.errors %}
                         <ul class="errorlist">
@@ -50,7 +50,7 @@
 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     <div class="form-row">
-                        <label for="{{ form.amount.id_for_label }}">Amount (€)</label>
+                        <label for="{{ form.amount.id_for_label }}">Ποσό (€)</label>
                         {{ form.amount }}
                         {% if form.amount.errors %}
                             <ul class="errorlist">
@@ -62,7 +62,7 @@
                     </div>
 
                     <div class="form-row">
-                        <label for="{{ form.date.id_for_label }}">Date</label>
+                        <label for="{{ form.date.id_for_label }}">Ημερομηνία</label>
                         {{ form.date }}
                         {% if form.date.errors %}
                             <ul class="errorlist">
@@ -75,10 +75,10 @@
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.receipt.id_for_label }}">Receipt (optional)</label>
+                    <label for="{{ form.receipt.id_for_label }}">Απόδειξη (προαιρετικό)</label>
                     {{ form.receipt }}
                     <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">
-                        Upload a receipt image or PDF for this expense
+                        Ανεβάστε εικόνα ή PDF απόδειξης για αυτό το έξοδο
                     </div>
                     {% if form.receipt.errors %}
                         <ul class="errorlist">
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="form-row">
-                    <label for="{{ form.notes.id_for_label }}">Notes (optional)</label>
+                    <label for="{{ form.notes.id_for_label }}">Σημειώσεις (προαιρετικό)</label>
                     {{ form.notes }}
                     {% if form.notes.errors %}
                         <ul class="errorlist">
@@ -102,8 +102,8 @@
                 </div>
 
                 <div class="form-actions" style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="btn" style="flex: 1;">Add Expense</button>
-                    <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 10px 16px; border-radius: 999px; text-decoration: none; display: flex; align-items: center; justify-content: center; min-width: 100px;">Cancel</a>
+                    <button type="submit" class="btn" style="flex: 1;">Προσθήκη Εξόδου</button>
+                    <a href="{% url 'expenses' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 10px 16px; border-radius: 999px; text-decoration: none; display: flex; align-items: center; justify-content: center; min-width: 100px;">Ακύρωση</a>
                 </div>
             </form>
         </div>

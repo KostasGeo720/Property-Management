@@ -1,14 +1,14 @@
 {% extends 'pm/base.html' %}
 
-{% block title %}Add Property{% endblock %}
+{% block title %}Προσθήκη Ακινήτου{% endblock %}
 
 {% block content %}
 <div class="auth-card">
     <h1>
         {% if complex == None %}
-        Add New Property
+        Προσθήκη Νέου Ακινήτου
         {% else %}
-        Add New Unit to {{ complex.address }}
+        Προσθήκη Νέας Μονάδας στο {{ complex.address }}
         {% endif %}
     </h1>
 
@@ -37,8 +37,8 @@
         </div>
         {% endfor %}
         <div class="form-actions">
-            <button type="submit" class="btn">{% block btn %}Add Property{% endblock %}</button>
-            <a href="{% url 'manage_properties' %}" class="btn btn-outline">Cancel</a>
+            <button type="submit" class="btn">{% block btn %}Προσθήκη Ακινήτου{% endblock %}</button>
+            <a href="{% url 'manage_properties' %}" class="btn btn-outline">Ακύρωση</a>
         </div>
     </form>
 </div>

@@ -1,10 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Property Management{% endblock %}</title>
+  <title>{% block title %}Διαχείριση Ακινήτων{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'pm/css/style.css' %}">
   <link rel="icon" href="{% static 'pm/favicon.ico' %}" type="image/x-icon">
   {% block extra_head %}{% endblock %}
@@ -15,11 +15,11 @@
       <a class="brand" href="{% url 'home' %}">PM</a>
       <ul class="nav-links">
         {% if user.is_authenticated %}
-          <li class="nav-item user">Hello, {{ user.username }}</li>
+          <li class="nav-item user">Γειά σου, {{ user.username }}</li>
           {% block staff_nav %}{% endblock staff_nav %}
-          <li class="nav-item"><a class="btn btn-outline" href="{% url 'logout' %}">Logout</a></li>
+          <li class="nav-item"><a class="btn btn-outline" href="{% url 'logout' %}">Αποσύνδεση</a></li>
         {% else %}
-          <li class="nav-item"><a href="{% url 'login' %}">Login</a></li>
+          <li class="nav-item"><a href="{% url 'login' %}">Σύνδεση</a></li>
         {% endif %}
       </ul>
     </nav>
@@ -39,7 +39,7 @@
 
   <footer class="site-footer">
     <div class="container">
-      <small>&copy; {% now "Y" %} Property Management</small>
+      <small>&copy; {% now "Y" %} Διαχείριση Ακινήτων</small>
     </div>
   </footer>
 

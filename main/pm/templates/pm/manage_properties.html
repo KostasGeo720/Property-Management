@@ -1,13 +1,13 @@
 {% extends 'pm/home.html' %}
 
-{% block title %}Manage Properties{% endblock %}
+{% block title %}Διαχείριση Ακινήτων{% endblock %}
 
 {% block content %}
-  <h2>My Properties</h2>
+  <h2>Τα Ακίνητά μου</h2>
 
   {% if properties or complexes %}
     {% if complexes %}
-      <h3>Property Complexes</h3>
+      <h3>Συγκροτήματα Ακινήτων</h3>
       <div class="property-grid">
         {% for complex in complexes %}
           <div class="property-card">
@@ -17,16 +17,16 @@
             </div>
             {% for unit in units %}
               {% if unit.complex == complex %}
-                <strong>{{unit.nickname}}</strong> - Floor:{{unit.floor}} Number:{{unit.number}} - {{unit.get_property_type_display}} - <a href="{% url 'manage_unit' unit.id %}" class="btn btn-outline">Manage Unit</a><br>
+                <strong>{{unit.nickname}}</strong> - Όροφος:{{unit.floor}} Αριθμός:{{unit.number}} - {{unit.get_property_type_display}} - <a href="{% url 'manage_unit' unit.id %}" class="btn btn-outline">Διαχείριση Μονάδας</a><br>
               {% endif %}
             {% endfor %}
             {% if not units %}
-              <p style="text-align: center;">No units added</p>
+              <p style="text-align: center;">Δεν έχουν προστεθεί μονάδες</p>
             {% endif %}
             <div class="property-details">
               <div style="text-align: center; margin-top: 10px;">
-                <a href="{% url "add_property_to_complex" complex.address %}" class="btn btn-primary">Add Unit</a>
-                <a href="{% url "delete_complex" complex.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this complex? This action cannot be undone.')">Delete Complex</a>
+                <a href="{% url "add_property_to_complex" complex.address %}" class="btn btn-primary">Προσθήκη Μονάδας</a>
+                <a href="{% url "delete_complex" complex.id %}" class="btn btn-outline" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το συγκρότημα; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.')"> Διαγραφή Συγκροτήματος</a>
               </div>
             </div>
           </div>
@@ -34,7 +34,7 @@
       </div>
       <hr style="margin: 40px 0;">
     {% endif %}
-    <h3>Individual Properties</h3>
+    <h3>Μεμονωμένα Ακίνητα</h3>
     <div class="property-grid">
       {% for property in properties %}
         <div class="property-card">
@@ -47,32 +47,32 @@
             {% endif %}
           </div>
           <div class="property-details">
-            <p><strong>Type:</strong> {{ property.get_property_type_display }}</p>
-            <p><strong>Size:</strong> {{ property.property_size }}</p>
-            <p><strong>Bedrooms:</strong> {{ property.bedrooms }} | <strong>Bathrooms:</strong> {{ property.bathrooms }}</p>
-            <p><strong>Parking:</strong> {{ property.parking_spaces }}</p>
-            <p><strong>Amenities:</strong> {{ property.amenities }}</p>
-            <p><strong>Description:</strong> {{ property.description }}</p>
+            <p><strong>Τύπος:</strong> {{ property.get_property_type_display }}</p>
+            <p><strong>Μέγεθος:</strong> {{ property.property_size }}</p>
+            <p><strong>Δωμάτια:</strong> {{ property.bedrooms }} | <strong>Μπάνια:</strong> {{ property.bathrooms }}</p>
+            <p><strong>Χώροι Στάθμευσης:</strong> {{ property.parking_spaces }}</p>
+            <p><strong>Προσθέτες Παροχές:</strong> {{ property.amenities }}</p>
+            <p><strong>Περιγραφή:</strong> {{ property.description }}</p>
             <div style="text-align: center; margin-top: 10px;">
               {% if property.id in leased_properties %}
-                  <a href="{% url "edit_lease" property.id %}" class="btn btn-outline">View Lease</a>
+                  <a href="{% url "edit_lease" property.id %}" class="btn btn-outline">Προβολή Μίσθωσης</a>
               {% else %}
-                <a href="{% url "create_lease" property.id %}" class="btn btn-primary">Create Lease</a>
+                <a href="{% url "create_lease" property.id %}" class="btn btn-primary">Δημιουργία Μίσθωσης</a>
               {% endif %}
             </div>
           </div>
           <div style="text-align: center; margin-top: 10px;">
-            <a href="{% url "edit_property" property.id %}" class="btn btn-primary">Edit Property</a>
-            <a href="{% url "delete_property" property.id %}" class="btn btn-outline" onclick="return confirm('Are you sure you want to delete this property? This action cannot be undone.')">Delete Property</a>
+            <a href="{% url "edit_property" property.id %}" class="btn btn-primary">Επεξεργασία Ακινήτου</a>
+            <a href="{% url "delete_property" property.id %}" class="btn btn-outline" onclick="return confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτό το ακίνητο; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.')"> Διαγραφή Ακινήτου</a>
           </div>
         </div>
       {% endfor %}
     </div>
 
   {% else %}
-    <p>You haven't added any properties yet.</p>
+    <p>Δεν έχετε προσθέσει ακόμη ακίνητα.</p>
   {% endif %}
   <div style="text-align: center; margin-top: 20px;">
-    <a href="{% url "new_property_page" %}" class="btn btn-primary">Add Property</a>
+    <a href="{% url "new_property_page" %}" class="btn btn-primary">Προσθήκη Ακινήτου</a>
   </div>
 {% endblock %}

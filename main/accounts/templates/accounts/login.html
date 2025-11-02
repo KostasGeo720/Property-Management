@@ -1,28 +1,28 @@
 {% extends "pm/base.html" %}
 {% load static %}
-{% block title %}Login | Property Management{% endblock %}
+{% block title %}Σύνδεση | Διαχείριση Ακινήτων{% endblock %}
 
 {% block content %}
   <section class="auth-card">
-    <h1>Log in</h1>
+    <h1>Σύνδεση</h1>
     <form method="post" class="form auth-form">
       {% csrf_token %}
       {{ form.non_field_errors }}
 
       <div class="form-row">
-        <label for="id_username">Username</label>
+        <label for="id_username">Όνομα Χρήστη</label>
         {{ form.username }}
         {{ form.username.errors }}
       </div>
 
       <div class="form-row">
-        <label for="id_password">Password</label>
+        <label for="id_password">Κωδικός Πρόσβασης</label>
         {{ form.password }}
         {{ form.password.errors }}
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn">Log in</button>
+        <button type="submit" class="btn">Σύνδεση</button>
       </div>
     </form>
   </section>

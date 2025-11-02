@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="auth-card">
-    <h1>{% block head %}Create New Lease{% endblock %}</h1>
+    <h1>{% block head %}Δημιουργία Νέας Μίσθωσης{% endblock %}</h1>
 
     {% if messages %}
     <ul class="messages">
@@ -30,7 +30,7 @@
         {% endfor %}
         {% block edit_view %}{% endblock %}
         <div class="form-actions">
-            <button type="submit" class="btn">{% block btn %}Create Lease{% endblock %}</button>
+            <button type="submit" class="btn">{% block btn %}Δημιουργία Μίσθωσης{% endblock %}</button>
             {% block edit %}{% endblock edit %}
         </div>
     </form>

@@ -5,7 +5,7 @@
     <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 32px;">
         <!-- Top Left: Income Distribution Pie Chart -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
-            <h2 style="margin-top:0;">Income Distribution</h2>
+            <h2 style="margin-top:0;">Κατανομή Εισοδήματος</h2>
             <canvas id="incomePieChart" width="320" height="220"></canvas>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
@@ -42,7 +42,7 @@
 
         <!-- Top Right: Latest Notifications -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
-            <h2 style="margin-top:0;">Latest Notifications</h2>
+            <h2 style="margin-top:0;">Τελευταίες Ειδοποιήσεις</h2>
             {% if notifications %}
                 {% for note in notifications|slice:":5" %}
                     <div class="notification-card">
@@ -58,26 +58,26 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <p style="color:var(--muted);">No notifications.</p>
+                <p style="color:var(--muted);">Δεν υπάρχουν ειδοποιήσεις.</p>
             {% endif %}
         </div>
 
         <!-- Bottom Left: Property Overview Spreadsheet -->
         <div style="background: var(--panel-2); border-radius: var(--radius); padding: 24px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">Property Overview</h2>
-                <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Export</button>
+                <h2 style="margin: 0;">Επισκόπηση Ακινήτων</h2>
+                <button onclick="exportSpreadsheet()" style="background: var(--primary); color: #00303a; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">Εξαγωγή</button>
             </div>
             
             <div style="max-height: 260px; overflow-y: auto;">
                 <table id="propertySpreadsheet" style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <thead style="sticky; top: 0; background: var(--panel-1); z-index: 1;">
                         <tr>
-                            <th style="text-align: left; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Property</th>
-                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Type</th>
-                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Monthly</th>
-                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Paid</th>
-                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Status</th>
+                            <th style="text-align: left; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Ακίνητο</th>
+                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Τύπος</th>
+                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Μηνιαίο</th>
+                            <th style="text-align: right; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Πληρωμένο</th>
+                            <th style="text-align: center; padding: 8px; border-bottom: 2px solid rgba(255,255,255,.08);">Κατάσταση</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -90,7 +90,7 @@
                                 </td>
                                 <td style="padding: 8px; text-align: center;">
                                     <span style="background: var(--panel-1); padding: 2px 6px; border-radius: 8px; font-size: 11px;">
-                                        {% if lease.property %}{{ lease.property.property_type|capfirst }}{% else %}Unit{% endif %}
+                                        {% if lease.property %}{{ lease.property.property_type|capfirst }}{% else %}Μονάδα{% endif %}
                                     </span>
                                 </td>
                                 <td style="padding: 8px; text-align: right; font-weight: 500;">€{{ lease.monthly_payment_amount|floatformat:2 }}</td>
@@ -103,7 +103,7 @@
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="5" style="padding: 24px; text-align: center; color: var(--muted);">No properties available</td>
+                                <td colspan="5" style="padding: 24px; text-align: center; color: var(--muted);">Δεν υπάρχουν διαθέσιμα ακίνητα</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -114,26 +114,26 @@
             <div style="margin-top: 16px; padding: 12px; border-top: 2px solid rgba(255,255,255,.08); background: var(--panel-1); border-radius: 8px;">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; font-size: 13px;">
                     <div style="text-align: center;">
-                        <div style="color: var(--muted); margin-bottom: 4px;">Total Properties</div>
+                        <div style="color: var(--muted); margin-bottom: 4px;">Σύνολο Ακινήτων</div>
                         <div style="font-weight: 600; color: var(--primary);">{{ leases|length }}</div>
                     </div>
                     <div style="text-align: center;">
-                        <div style="color: var(--muted); margin-bottom: 4px;">Monthly Income</div>
+                        <div style="color: var(--muted); margin-bottom: 4px;">Μηνιαίο Εισόδημα</div>
                         <div style="font-weight: 600; color: var(--success);">€<span id="totalIncome">0.00</span></div>
                     </div>
                     <div style="text-align: center;">
-                        <div style="color: var(--muted); margin-bottom: 4px;">Total Collected</div>
+                        <div style="color: var(--muted); margin-bottom: 4px;">Συνολικά Εισπραχθέντα</div>
                         <div style="font-weight: 600; color: var(--text);">€<span id="totalCollected">0.00</span></div>
                     </div>
                 </div>
             </div>
-            <a href="{% url 'expenses' %}" style="display:inline-block; margin-top:12px; color:var(--primary); text-decoration:none;">View Expenses</a>
+            <a href="{% url 'expenses' %}" style="display:inline-block; margin-top:12px; color:var(--primary); text-decoration:none;">Προβολή Εξόδων</a>
             
             <!-- Recent Expenses Overview -->
             <div style="margin-top: 24px; padding-top: 20px; border-top: 2px solid rgba(255,255,255,.08);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="margin: 0; font-size: 16px; color: var(--text);">Recent Expenses</h3>
-                    <span style="font-size: 12px; color: var(--muted);">Last 10 expenses</span>
+                    <h3 style="margin: 0; font-size: 16px; color: var(--text);">Πρόσφατες Έξοδα</h3>
+                    <span style="font-size: 12px; color: var(--muted);">Τελευταίες 10 έξοδα</span>
                 </div>
                 
                 {% if recent_expenses %}
@@ -141,11 +141,11 @@
                         <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                             <thead style="position: sticky; top: 0; background: var(--panel-1); z-index: 1;">
                                 <tr>
-                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Date</th>
-                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Property</th>
-                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Category</th>
-                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Description</th>
-                                    <th style="text-align: right; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Amount</th>
+                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Ημερομηνία</th>
+                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Ακίνητο</th>
+                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Κατηγορία</th>
+                                    <th style="text-align: left; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Περιγραφή</th>
+                                    <th style="text-align: right; padding: 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 11px; color: var(--muted);">Ποσό</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -176,14 +176,14 @@
                     
                     <!-- Expenses Summary -->
                     <div style="margin-top: 12px; padding: 8px 12px; background: var(--panel-1); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
-                        <span style="font-size: 11px; color: var(--muted);">Total Recent Expenses:</span>
+                        <span style="font-size: 11px; color: var(--muted);">Σύνολο Πρόσφατων Εξόδων:</span>
                         <span style="font-weight: 600; color: var(--danger); font-size: 12px;" id="totalRecentExpenses">€0.00</span>
                     </div>
                 {% else %}
                     <div style="padding: 20px; text-align: center; color: var(--muted); background: var(--panel-1); border-radius: 6px;">
                         <div style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;">💰</div>
-                        <div style="font-size: 12px;">No expenses recorded yet</div>
-                        <a href="{% url 'expenses' %}" style="color: var(--primary); text-decoration: none; font-size: 11px; margin-top: 4px; display: inline-block;">Add your first expense</a>
+                        <div style="font-size: 12px;">Δεν έχουν καταγραφεί έξοδα ακόμα</div>
+                        <a href="{% url 'expenses' %}" style="color: var(--primary); text-decoration: none; font-size: 11px; margin-top: 4px; display: inline-block;">Προσθήκη πρώτης εξόδου</a>
                     </div>
                 {% endif %}
             </div>

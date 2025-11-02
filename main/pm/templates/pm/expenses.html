@@ -3,10 +3,10 @@
 {% block content %}
 <div class="container" style="margin-top:32px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h1 style="margin: 0; color: var(--text);">Property Expenses</h1>
+        <h1 style="margin: 0; color: var(--text);">Έξοδα Ακινήτων</h1>
         <div style="display: flex; gap: 12px;">
-            <button onclick="exportAllExpenses()" style="background: var(--primary); color: #00303a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Export All</button>
-            <a href="{% url 'finances' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Back to Finances</a>
+            <button onclick="exportAllExpenses()" style="background: var(--primary); color: #00303a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;">Εξαγωγή Όλων</button>
+            <a href="{% url 'finances' %}" style="background: var(--panel-1); color: var(--text); border: 1px solid rgba(255,255,255,.08); padding: 8px 16px; border-radius: 6px; text-decoration: none;">← Επιστροφή στα Οικονομικά</a>
         </div>
     </div>
 
@@ -14,15 +14,15 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
         <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 4px;">{{ total_properties }}</div>
-            <div style="color: var(--muted); font-size: 14px;">Total Properties</div>
+            <div style="color: var(--muted); font-size: 14px;">Σύνολο Ακινήτων</div>
         </div>
         <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: var(--danger); margin-bottom: 4px;" id="totalExpenses">€0.00</div>
-            <div style="color: var(--muted); font-size: 14px;">Total Expenses</div>
+            <div style="color: var(--muted); font-size: 14px;">Συνολικές Έξοδες</div>
         </div>
         <div style="background: var(--panel-2); padding: 20px; border-radius: var(--radius); text-align: center;">
             <div style="font-size: 24px; font-weight: 700; color: var(--warning); margin-bottom: 4px;" id="avgExpenses">€0.00</div>
-            <div style="color: var(--muted); font-size: 14px;">Avg per Property</div>
+            <div style="color: var(--muted); font-size: 14px;">ΜΈ ανά Ακίνητο</div>
         </div>
     </div>
 
@@ -46,21 +46,21 @@
                                 {% if item.type == 'property' %}
                                     {{ item.object.property_type|capfirst }}
                                 {% else %}
-                                    Unit {{ item.object.number }} (Floor {{ item.object.floor }})
+                                    Μονάδα {{ item.object.number }} (Όροφος {{ item.object.floor }})
                                 {% endif %}
                             </span>
                             <span style="color: var(--muted); font-size: 14px;">
-                                {{ item.expenses|length }} expense{{ item.expenses|length|pluralize }}
+                                {{ item.expenses|length }} έξοδο{% if item.expenses|length != 1 %}ς{% endif %}
                             </span>
                             <span style="color: var(--danger); font-weight: 600;">
-                                Total: €{{ item.total_expenses|floatformat:2 }}
+                                Σύνολο: €{{ item.total_expenses|floatformat:2 }}
                             </span>
                         </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <a href="{% url 'create_expense' %}?type={{ item.type }}&id={{ item.object.id }}" onclick="event.stopPropagation();"
                            style="background: var(--success); color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; text-decoration: none; display: inline-block;">
-                            + Add Expense
+                            + Προσθήκη Εξόδου
                         </a>
                         <span class="expand-arrow" id="arrow-{{ forloop.counter }}" style="transition: transform 0.3s; font-size: 18px;">▼</span>
                     </div>
@@ -73,11 +73,11 @@
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead style="background: var(--panel-1);">
                                     <tr>
-                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Date</th>
-                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Category</th>
-                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Description</th>
-                                        <th style="text-align: right; padding: 12px; font-size: 13px; color: var(--muted);">Amount</th>
-                                        <th style="text-align: center; padding: 12px; font-size: 13px; color: var(--muted);">Receipt</th>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Ημερομηνία</th>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Κατηγορία</th>
+                                        <th style="text-align: left; padding: 12px; font-size: 13px; color: var(--muted);">Περιγραφή</th>
+                                        <th style="text-align: right; padding: 12px; font-size: 13px; color: var(--muted);">Ποσό</th>
+                                        <th style="text-align: center; padding: 12px; font-size: 13px; color: var(--muted);">Απόδειξη</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -100,7 +100,7 @@
                                             </td>
                                             <td style="padding: 12px; text-align: center;">
                                                 {% if expense.receipt %}
-                                                    <a href="{{ expense.receipt.url }}" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 12px;">📄 View</a>
+                                                    <a href="{{ expense.receipt.url }}" target="_blank" style="color: var(--primary); text-decoration: none; font-size: 12px;">📄 Προβολή</a>
                                                 {% else %}
                                                     <span style="color: var(--muted); font-size: 12px;">—</span>
                                                 {% endif %}
@@ -113,7 +113,7 @@
                     {% else %}
                         <div style="padding: 32px; text-align: center; color: var(--muted);">
                             <div style="font-size: 48px; margin-bottom: 12px; opacity: 0.3;">💰</div>
-                            <div>No expenses recorded for this property yet.</div>
+                            <div>Δεν υπάρχουν καταγεγραμμένα έξοδα για αυτό το ακίνητο ακόμη.</div>
                             <a href="{% url 'create_expense' %}?type={{ item.type }}&id={{ item.object.id }}"
                                style="background: var(--primary); color: #00303a; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 12px; font-weight: 600; text-decoration: none; display: inline-block;">
                                 Add First Expense
@@ -125,10 +125,10 @@
         {% empty %}
             <div style="background: var(--panel-2); padding: 48px; border-radius: var(--radius); text-align: center;">
                 <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">🏠</div>
-                <h3 style="color: var(--muted); margin-bottom: 8px;">No Properties Found</h3>
-                <p style="color: var(--muted);">You don't have any properties or units to track expenses for.</p>
+                <h3 style="color: var(--muted); margin-bottom: 8px;">Δεν Βρέθηκαν Ακίνητα</h3>
+                <p style="color: var(--muted)">Δεν έχετε ακίνητα ή μονάδες για να παρακολουθείτε τα έξοδα.</p>
                 <a href="{% url 'create_property' %}" style="background: var(--primary); color: #00303a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; margin-top: 16px; display: inline-block;">
-                    Add Your First Property
+                                        Δημιουργία Πρώτου Ακινήτου
                 </a>
             </div>
         {% endfor %}
@@ -168,7 +168,7 @@
     // Export all expenses
     function exportAllExpenses() {
         const tables = document.querySelectorAll('.expense-details table');
-        let csv = ['Property,Date,Category,Description,Amount,Notes'];
+        let csv = ['Ακίνητο,Ημερομηνία,Κατηγορία,Περιγραφή,Ποσό,Σημειώσεις'];
         
         tables.forEach((table, index) => {
             const propertyName = table.closest('.expense-card').querySelector('h3').textContent.trim();

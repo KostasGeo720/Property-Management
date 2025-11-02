@@ -2,31 +2,31 @@
 
 {% block content %}
 <section class="auth-card">
-    <h1>Report a Problem</h1>
+    <h1>Αναφορά Προβλήματος</h1>
     <form method="post" class="form auth-form">
         {% csrf_token %}
         {{ form.non_field_errors }}
         <div class="form-row">
-            <label for="id_description">Problem Description</label>
+            <label for="id_description">Περιγραφή Προβλήματος</label>
             {{ form.description }}
             {{ form.description.errors }}
         </div>
         {% if properties %}
         <div class="form-row">
-            <label for="id_property">Property Address</label>
+            <label for="id_property">Διεύθυνση Ακινήτου</label>
             {{ form.property }}
             {{ form.property.errors }}
         </div>
         {% endif %}
         {% if units %}
         <div class="form-row">
-            <label for="id_unit">Unit</label>
+            <label for="id_unit">Μονάδα</label>
             {{ form.unit }}
             {{ form.unit.errors }}
         </div>
         {% endif %}
         <div class="form-actions">
-            <button type="submit" class="btn">Report Problem</button>
+            <button type="submit" class="btn">Αναφορά Προβλήματος</button>
         </div>
     </form>
 </section>
